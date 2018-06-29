@@ -1,1 +1,1 @@
-# marshalls_capstone
+# Marshall Payne's Galvanize Capstone Project
