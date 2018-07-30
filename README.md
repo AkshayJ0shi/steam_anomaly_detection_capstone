@@ -5,11 +5,13 @@
 
 (What is new about your approach, why do you think it will be successful?)
 
-(Who cares?)
-Developers and Steam. They both get a cut of the steam market, so items selling at higher prices or quantities means higher income.
+### Who would this impact?
 
-(How will you present your work?)
-I would love to do a web-app, and that could be an extension of my project, but I don't see myself having enough time to put one together that I'm proud of. I think it could be neat to create a Jupyter Notebook that gives a glimps of my work at each step of the project, especially if I can put together interactive graphs. I could be convinced to put together a powerpoint, but I am not a fan and would rather avoid of other options are just as good.
+Developers and Valve (owner of Steam). They both get a cut of the steam market, so items selling at higher prices or quantities means higher income.
+
+### Presentation:
+
+I would love to do a web-app, and that could be an extension of my project, but I don't see myself having enough time to put one together that I'm proud of. I think it could be neat to create a Jupyter Notebook that gives a glimps of my work at each step of the project, especially if I can put together interactive graphs. I could be convinced to put together a powerpoint, but I am not a fan and would rather avoid if other options are just as good.
 
 ### Data I have a way to get:
 
