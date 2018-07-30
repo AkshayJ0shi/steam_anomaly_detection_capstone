@@ -1,13 +1,17 @@
 # Marshall Payne's Galvanize Capstone Project
-[Steam](https://store.steampowered.com/) is the largest digital distribution platform for video games. A subset of games on Steam include items that can be found in-game and sold to other players on [Steam's Community Market](https://steamcommunity.com/market/). I am interested to find out if there are any patterns between the reviews of games and the price their items sell for.
+[Steam](https://store.steampowered.com/) is the largest digital video game distribution platform. A subset of games on Steam include items that can be found in-game and sold to other players on [Steam's Community Market](https://steamcommunity.com/market/). I am interested to find out if there is any correlation between the reviews of games and the price their in-game items sell for.
 
 (How was the problem solved before?)
 
+
+
 (What is new about your approach, why do you think it will be successful?)
+
+
 
 ### Who would this impact?
 
-Developers and Valve (owner of Steam). They both get a cut of the steam market, so items selling at higher prices or quantities means higher income.
+Developers and Valve (owner of Steam). They both get a cut of the Steam market sales, so items selling at higher prices or quantities means higher income.
 
 ### Presentation:
 
@@ -23,8 +27,10 @@ I would love to do a web-app, and that could be an extension of my project, but 
 I have links to API endpoint for the price/quantity of sold in-game items. I have piplines to scrape the store pages of games to get the tags that I can use to categorize games. I also have the link to the endpoint that Steam uses to graph the game's reviews over time. I plan to run EC2s to gather the data and house it in a MongoDB hosted on a different EC2. I still need to configure the EC2s to run scripts continuously, push the data to the MongoDB, and build in redundancy to avoid losing data.
 
 ### Estimated size of the dataset:
-I collected ~70% of the Counter-strike: Global Offensive (CS:GO) item sales, and it came out to be ~7.5m entries. CS:GO a game with one of the largest collections of items so this is one of the larger games in terms of data points, but I think the number of items I collected data from represents ~2% of the total items on the Steam Market, which would put a liberal estimate at ~375m data points for the Market item sales. Each game will also have ~20 tags/categories and \[number of positive reviews, number of negative reviews\] per month since the game was released associated with it.
+I collected ~70% of the Counter-strike: Global Offensive (CS:GO) item sales, and it came out to be ~7.5m entries. CS:GO is a game with one of the largest collections of items so this is one of the larger games in terms of data points, but I think the number of items I collected data from represents ~2% of the total items on the Steam Market, which would put a liberal estimate at ~375m data points for the Market item sales. Each game will also have ~20 tags/categories and \[number of positive reviews, number of negative reviews\] per month since the game was released associated with it.
 
 (Potential Problems?)
+
+
 
 (Next thing to work on)
