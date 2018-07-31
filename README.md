@@ -1,4 +1,5 @@
 # Marshall Payne's Galvanize Capstone Project
+## Steam Market Anomaly Detection
 [Steam](https://store.steampowered.com/) is the largest digital video game distribution platform. A subset of games on Steam include items that can be found in-game and sold to other players on [Steam's Community Market](https://steamcommunity.com/market/). I am interested in finding anomolies in item prices that might indicate that some event occured. An extension of the project would be to automate a way to search news articles for events happening around the time the anomalies occured. I could then use similar future events as likely predictors of acute changes in item prices.
 
 ### How the problem was solved before:
