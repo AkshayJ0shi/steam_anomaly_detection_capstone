@@ -1,17 +1,18 @@
 # Marshall Payne's Galvanize Capstone Project
-[Steam](https://store.steampowered.com/) is the largest digital video game distribution platform. A subset of games on Steam include items that can be found in-game and sold to other players on [Steam's Community Market](https://steamcommunity.com/market/). I am interested to find out if there is any correlation between the reviews of games and the price their in-game items sell for.
+## Steam Market Anomaly Detection
+[Steam](https://store.steampowered.com/) is the largest digital video game distribution platform. A subset of games on Steam include items that can be found in-game and sold to other players on [Steam's Community Market](https://steamcommunity.com/market/). I am interested in finding anomolies in item prices that might indicate that some event occured. An extension of the project would be to automate a way to search news articles for events happening around the time the anomalies occured. I could then use similar future events as likely predictors of acute changes in item prices.
 
-(How was the problem solved before?)
+### How the problem was solved before:
 
+I pivoted on the direction of my project today so I haven't done much research on anomaly detection, but that isn't a novel problem. 
 
+### What's new about my approach and why it will be successful:
 
-(What is new about your approach, why do you think it will be successful?)
-
-
+I haven't seen this problem applied to Steam. I think it's likely there will be changes in item prices that align with significant events in the gaming community.
 
 ### Who would this impact?
 
-Developers and Valve (owner of Steam). They both get a cut of the Steam market sales, so items selling at higher prices or quantities means higher income.
+People who are involved in trading items on Steam would be interested to know how to predict changes in item prices. Valve (the owner of Steam) and game Developers get a cut of every item traded through the Steam Market, so they might also be interested in leveraging spikes in trade quantity. For example, releasing new items right before a large event if that causes people to get involved in trading, or avoiding releasing new items around the time of events if they would be missing out on potential profit by overlapping opportunities.
 
 ### Presentation:
 
@@ -29,8 +30,9 @@ I have links to API endpoint for the price/quantity of sold in-game items. I hav
 ### Estimated size of the dataset:
 I collected ~70% of the Counter-strike: Global Offensive (CS:GO) item sales, and it came out to be ~7.5m entries. CS:GO is a game with one of the largest collections of items so this is one of the larger games in terms of data points, but I think the number of items I collected data from represents ~2% of the total items on the Steam Market, which would put a liberal estimate at ~375m data points for the Market item sales. Each game will also have ~20 tags/categories and \[number of positive reviews, number of negative reviews\] per month since the game was released associated with it.
 
-(Potential Problems?)
+### Potential Problems:
 
+From what I've seen items generally trade for a much higher prices when they first come out, then they plateau. This could cause issues with anomaly detection. I also expect the dataset to be extremely inbalanced with some items trading houndred of thousands every day, while others are sold once a month.
 
-
-(Next thing to work on)
+### Next things to work on:
+First and foremost I need to get data coming in. I think need to do research on anomaly detection and timeseries analysis. After that I plan to start doing some EDA to gather the simplest metrics.
