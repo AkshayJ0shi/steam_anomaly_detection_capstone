@@ -6,7 +6,7 @@ import ast
 
 
 def scrape_steam(app_id, session):
-    cookies = {'birtmetacritic_scorehtime': '283993201', 'mature_content': '1'}
+    cookies = {'birthtime': '283993201', 'mature_content': '1'}
     request_get = session.get('https://store.steampowered.com/app/{}'.format(app_id), cookies=cookies)
     bs = BeautifulSoup(request_get.text.encode('utf-8'), 'lxml')
     tag_bs = bs(text=re.compile('InitAppTagModal'))
