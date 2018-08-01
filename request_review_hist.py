@@ -33,3 +33,13 @@ if __name__ == '__main__':
             reviews = get_reviews(app_id, app_name)
             if reviews:
                 g.write(str(reviews))
+
+
+# Code to fix formatting to be able to evaluate with eval():
+# string = re.sub(r'\]\[', '],[', string)
+# string = '[' + string
+# string = string + ']'
+# b = eval(string)
+# for x in range(len(b)):
+#     for y in range(len(b[x])):
+#         b[x][y]['date'] = str(b[x][y]['date'])
