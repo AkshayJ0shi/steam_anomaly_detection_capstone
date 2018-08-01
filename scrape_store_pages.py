@@ -33,8 +33,8 @@ if __name__ == '__main__':
                 continue
             progress(i, total, app_name)
             request_return = scrape_page(app_id, session)
-            if request_return.status_code == 200:
-                g.write(str(app_id))
+            if request_return.status_code != 200:
+                g.write(str(app_id) + '/n')
             elif request_return.url != 'https://store.steampowered.com/':
                 with open('data/store_pages/' + str(app_id) + '.html', 'w') as file:
                     file.write(request_return.text)

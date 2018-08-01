@@ -24,15 +24,15 @@ def progress(count, total, status=''):
 if __name__ == '__main__':
     user = wa.WebAuth(os.environ['STEAM_ID'], os.environ["STEAM_PASSWORD"])
     session = user.login()
-    with open('steam_capstone/item_names_non_empty.txt') as f:
+    with open('data/sourced_id_to_name.txt') as f:
         app_dict = ast.literal_eval(f.read())
     with open('data/games_with_items/ERRORLOG.txt', 'w') as g:
         total = len(app_dict)
         for i, (app_id, app_name) in enumerate(app_dict.items()):
             progress(i, total, app_id)
             request_return = scrape_page(app_id, session)
-            if request_return.status_code == 200:
-                g.write(str(app_id))
+            if request_return.status_code != 200:
+                g.write(str(app_id) + '/n')
             elif request_return.url != 'https://store.steampowered.com/':
                 with open('data/games_with_items/' + str(app_id) + '.html', 'w') as file:
                     file.write(request_return.text)
