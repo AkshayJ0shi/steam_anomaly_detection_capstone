@@ -4,11 +4,11 @@
 
 ### How the problem was solved before:
 
-I pivoted on the direction of my project today so I haven't done much research on anomaly detection, but that isn't a novel problem. 
+One Class SVM. With time series data, there will be seasonal and long term trends that need to be accounted for. After those trends are removed outliers will appear.
 
 ### What's new about my approach and why it will be successful:
 
-I haven't seen this problem applied to Steam. I think it's likely there will be changes in item prices that align with significant events in the gaming community.
+I haven't seen this problem applied to Steam. I think it's likely there will be changes in item prices that align with significant events in the gaming community. It seems like anomaly detection is primarily used to remove outliers to form more predictive models, whereas I will be using it to identify specific events that can be investigated.
 
 ### Who would this impact?
 
