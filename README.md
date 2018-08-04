@@ -4,7 +4,7 @@
 
 ### How the problem was solved before:
 
-One Class SVM. With time series data, there will be seasonal and long term trends that need to be accounted for. After those trends are removed outliers will appear.
+With time series data, there will be seasonal and long term trends that need to be accounted for. After those trends are removed outliers will appear. One Class SVM. ARIMA.
 
 ### What's new about my approach and why it will be successful:
 
