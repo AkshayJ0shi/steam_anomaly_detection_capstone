@@ -4,7 +4,7 @@
 
 ### How the problem was solved before:
 
-With time series data, there will be seasonal and long term trends that need to be accounted for. After those trends are removed outliers will appear. One Class SVM. ARIMA.
+With time series data, there will be seasonal and long term trends that need to be accounted for. After those trends are removed outliers will appear. ARIMA can be used to remove the trends, then HOT SAX, One Class SVM, or KNN can be used to detect outliers or shocks.
 
 ### What's new about my approach and why it will be successful:
 
