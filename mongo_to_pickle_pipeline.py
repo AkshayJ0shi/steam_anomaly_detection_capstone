@@ -39,6 +39,7 @@ def split_col(df, lst_col='prices'):
                          for col in df.columns.difference([lst_col])}) \
              .assign(**{lst_col: np.concatenate(df[lst_col].values)})[df.columns.tolist()]
     df[['date', 'median_sell_price', 'quantity']] = pd.DataFrame(df.prices.values.tolist(), index=df.index)
+    df['quantity'] = list(map(int, df['quantity']))
     return df.drop(columns='prices')
 
 
