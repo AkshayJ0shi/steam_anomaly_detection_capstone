@@ -7,7 +7,7 @@ import requests
 import sys
 
 def scrape_page(app_id, session):
-    cookies = {'birthtime': '283993201', 'mature_content': '1'}
+    cookies = {'birthtime': '283993201', 'mature_content': '1'} # Avoids age gates
     return session.get('https://store.steampowered.com/app/{}'.format(app_id), cookies=cookies)
 
 
