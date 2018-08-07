@@ -2,7 +2,21 @@ from pymongo import MongoClient
 import pickle
 import pandas as pd
 import numpy as np
-import datetime
+
+
+def get_cursor(app=None):
+    """
+    Get a mongo cursor to query a single app (or every app if no param is given)
+    :param app: (int) id of app
+    :return:
+    """
+    client = MongoClient()
+    db = client.steam_capstone
+    collection = db.market
+    if app:
+        return collection.find({'app': app})
+    else:
+        return collection.find()
 
 
 def mongo_to_df(cursor):
@@ -14,6 +28,13 @@ def mongo_to_df(cursor):
 
 
 def split_col(df, lst_col='prices'):
+    """
+    Takes a column with a list of dicts as entries and turns each dict entry into its own row,
+     and each key into a column.
+    :param df:
+    :param lst_col: 'prices' looks like: [{'date':date, 'median_sell_price':msp, 'quantity':quantity}, ...]
+    :return:
+    """
     df = pd.DataFrame({col: np.repeat(df[col].values, df[lst_col].str.len())
                          for col in df.columns.difference([lst_col])}) \
              .assign(**{lst_col: np.concatenate(df[lst_col].values)})[df.columns.tolist()]
@@ -60,20 +81,6 @@ def pickle_df(df, filename):
     with open(filename + '.pkl', 'wb') as f:
         pickle.dump(df, f)
 
-
-def get_cursor(app=None):
-    """
-    Get a mongo cursor to query a single app (or every app if no param is given)
-    :param app: (int) id of app
-    :return:
-    """
-    client = MongoClient()
-    db = client.steam_capstone
-    collection = db.market
-    if app:
-        return collection.find({'app': app})
-    else:
-        return collection.find()
 
 
 def mongo_to_clean_df_pipeline(filename, app=None):
