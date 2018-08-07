@@ -1,12 +1,15 @@
 from bs4 import BeautifulSoup
 import os
-import steam.webauth as wa
 import re
-import ast
 from pymongo import MongoClient
 
 
 def scrape_local_tags(page):
+    """
+    Extracts the tags and number of people who tagged the game with that category.
+    :param page: (str) html app page
+    :return: [{"tagid" : 7368, "name" : "Local Multiplayer", "count" : 11}, ...]
+    """
     bs = BeautifulSoup(page, 'lxml')
     tag_bs = bs(text=re.compile('InitAppTagModal'))
     if tag_bs:
