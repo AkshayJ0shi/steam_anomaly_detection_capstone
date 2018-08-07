@@ -14,9 +14,11 @@ def mongo_to_df(cursor):
 
 
 def split_col(df, lst_col='prices'):
-    return pd.DataFrame({col: np.repeat(df[col].values, df[lst_col].str.len())
+    df = pd.DataFrame({col: np.repeat(df[col].values, df[lst_col].str.len())
                          for col in df.columns.difference([lst_col])}) \
              .assign(**{lst_col: np.concatenate(df[lst_col].values)})[df.columns.tolist()]
+    df[['date', 'median_sell_price', 'quantity']] = pd.DataFrame(df.prices.values.tolist(), index=df.index)
+    return df.drop(columns='prices')
 
 
 def strip_hours(df):
@@ -31,7 +33,7 @@ def strip_hours(df):
 
 def remove_non_daily(df):
     """
-    Removes all entries that are not daily median/price data points.
+    Removes all entries that are not daily median/price data points. (The last month of entries are hourly)
     :param df:
     :return:
     """
@@ -44,29 +46,56 @@ def transform_to_datetime(df):
     :param df:
     :return:
     """
-    pass
+    df.date = pd.to_datetime(df.date)
+    return df
 
 
-def pickle_df():
+def pickle_df(df, filename):
     """
-    Saves a pickle of the cleaned df
+    Saves the df into a pickle
+    :param df: clean df
+    :param filename: (str) name of .pkl file
     :return:
     """
-    pass
+    with open(filename + '.pkl', 'wb') as f:
+        pickle.dump(df, f)
 
 
-def get_cursor(app=False):
+def get_cursor(app=None):
+    """
+    Get a mongo cursor to query a single app (or every app if no param is given)
+    :param app: (int) id of app
+    :return:
+    """
     client = MongoClient()
     db = client.steam_capstone
     collection = db.market
     if app:
-        return pd.DataFrame(list(collection.find({'app': app})))
+        return collection.find({'app': app})
     else:
-        return pd.DataFrame(list(collection.find()))
+        return collection.find()
 
 
-def mongo_to_clean_df_pipeline():
+def mongo_to_clean_df_pipeline(filename, app=None):
+    """
+    Creates pickle file of a cleaned dataframe
+    :param filename: (str) name of pickle file
+    :param app: (int) id of app
+    :return:
+    """
+    cursor = get_cursor(app)
+    df = mongo_to_df(cursor)
+    df = split_col(df)
+    df = strip_hours(df)
+    df = remove_non_daily(df)
+    df = transform_to_datetime(df)
+    df = df.drop(columns='_id')
+    pickle_df(df, filename)
     pass
 
 
 if __name__ == '__main__':
+    mongo_to_clean_df_pipeline('data/dota2_df', app=570)
+    mongo_to_clean_df_pipeline('data/tf2_df', app=440)
+    mongo_to_clean_df_pipeline('data/csgo_df', app=730)
+    mongo_to_clean_df_pipeline('data/full_df')
