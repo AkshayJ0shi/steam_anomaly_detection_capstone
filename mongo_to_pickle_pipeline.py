@@ -59,11 +59,10 @@ def split_sales_records(record):
     :param record:
     :return:
     """
-    last_date = 0
     for interaction in record['prices']:
         # date = pd.to_datetime(interaction['date'][:11]) # <- took up too much memory (I think)
         date = time.mktime(datetime.datetime.strptime(interaction['date'][:11], "%b %d %Y").timetuple())
-        if date == last_date: # This will occur when we go from daily records to hourly. I don't want the hourly records
+        if date > 1.530335e+09: # This will occur when we go from daily records to hourly. Just taking records before Jul 01 2018
             break
         yield {
             'median_sell_price': interaction['median_sell_price'],
@@ -71,9 +70,8 @@ def split_sales_records(record):
             'date': date,
             'app': record['app'],
             'item_name': record['item_name']}
-        last_date = date
 
-
+# Commented out to avoid overwritting
 if __name__ == '__main__':
     cursor = get_cursor()
     df = iterator2dataframe(cursor, 20, func=split_sales_records, total=cursor.count())
