@@ -1,7 +1,9 @@
 from pymongo import MongoClient
 import pickle
 import pandas as pd
-import numpy as np
+from tqdm import tqdm
+import time
+import datetime
 
 
 def get_cursor(app=None):
@@ -19,90 +21,61 @@ def get_cursor(app=None):
         return collection.find()
 
 
-def mongo_to_df(cursor):
+def iterator2dataframe(iterator,
+                       chunk_size: int,
+                       func=None,
+                       **kwargs) -> pd.DataFrame:
+    """Turn an Mongo iterator into multiple small pandas.DataFrame
+    This is a balance between memory and efficiency
+    If no result, return empty pandas.DataFrame
+    Args:
+      iterator: an iterator
+      chunk_size: the row size of each small pandas.DataFrame
+      func: generator to transform each record
+      kwargs: extra parameters passed to tqdm.tqdm
+    Returns:
+      pandas.DataFrame
     """
-    Loads the data from a Cursor into a df
+    records = []
+    frames = []
+    for i, record in enumerate(tqdm(iterator, **kwargs)):
+        if func:
+            for new_record in func(record):
+                records.append(new_record)
+        else:
+            records.append(record)
+        if i % chunk_size == chunk_size - 1:
+            frames.append(pd.DataFrame(records))
+            records = []
+    if records:
+        frames.append(pd.DataFrame(records))
+    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+
+# func parameter example, must be a Generator
+def split_sales_records(record):
+    """
+    For each item, makes each date/price/quantity separate rows
+    :param record:
     :return:
     """
-    return pd.DataFrame(list(cursor))
-
-
-def split_col(df, lst_col='prices'):
-    """
-    Takes a column with a list of dicts as entries and turns each dict entry into its own row,
-     and each key into a column.
-    :param df:
-    :param lst_col: 'prices' looks like: [{'date':date, 'median_sell_price':msp, 'quantity':quantity}, ...]
-    :return:
-    """
-    df = pd.DataFrame({col: np.repeat(df[col].values, df[lst_col].str.len())
-                         for col in df.columns.difference([lst_col])}) \
-             .assign(**{lst_col: np.concatenate(df[lst_col].values)})[df.columns.tolist()]
-    df[['date', 'median_sell_price', 'quantity']] = pd.DataFrame(df.prices.values.tolist(), index=df.index)
-    return df.drop(columns='prices')
-
-
-def strip_hours(df):
-    """
-    Strips off the hour stamp from the date to prepare it for comparison and transformation to datetime object.
-    :param df:
-    :return:
-    """
-    df.date = [x[:11] for x in df.date]
-    return df
-
-
-def remove_non_daily(df):
-    """
-    Removes all entries that are not daily median/price data points. (The last month of entries are hourly)
-    :param df:
-    :return:
-    """
-    return df[df.groupby(by=['item_name', 'app', 'date'], as_index=False).transform('count').quantity == 1]
-
-
-def transform_to_datetime(df):
-    """
-    Transforms the formatted date to a datetime object
-    :param df:
-    :return:
-    """
-    df.date = pd.to_datetime(df.date)
-    return df
-
-
-def pickle_df(df, filename):
-    """
-    Saves the df into a pickle
-    :param df: clean df
-    :param filename: (str) name of .pkl file
-    :return:
-    """
-    with open(filename + '.pkl', 'wb') as f:
-        pickle.dump(df, f)
-
-
-
-def mongo_to_clean_df_pipeline(filename, app=None):
-    """
-    Creates pickle file of a cleaned dataframe
-    :param filename: (str) name of pickle file
-    :param app: (int) id of app
-    :return:
-    """
-    cursor = get_cursor(app)
-    df = mongo_to_df(cursor)
-    df = split_col(df)
-    df = strip_hours(df)
-    df = remove_non_daily(df)
-    df = transform_to_datetime(df)
-    df = df.drop(columns='_id')
-    pickle_df(df, filename)
-    pass
+    last_date = 0
+    for interaction in record['prices']:
+        # date = pd.to_datetime(interaction['date'][:11]) # <- took up too much memory (I think)
+        date = time.mktime(datetime.datetime.strptime(interaction['date'][:11], "%b %d %Y").timetuple())
+        if date == last_date: # This will occur when we go from daily records to hourly. I don't want the hourly records
+            break
+        yield {
+            'median_sell_price': interaction['median_sell_price'],
+            'quantity': int(interaction['quantity']),
+            'date': date,
+            'app': record['app'],
+            'item_name': record['item_name']}
+        last_date = date
 
 
 if __name__ == '__main__':
-    mongo_to_clean_df_pipeline('data/dota2_df', app=570)
-    mongo_to_clean_df_pipeline('data/tf2_df', app=440)
-    mongo_to_clean_df_pipeline('data/csgo_df', app=730)
-    mongo_to_clean_df_pipeline('data/full_df')
+    cursor = get_cursor()
+    df = iterator2dataframe(cursor, 20, func=split_sales_records, total=cursor.count())
+    with open('data/all_apps_df.pkl', 'wb') as f:
+        pickle.dump(df, f)
