@@ -1,5 +1,4 @@
 from pymongo import MongoClient
-import pickle
 import pandas as pd
 from tqdm import tqdm
 import time

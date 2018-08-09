@@ -1,5 +1,4 @@
 import requests
-import ast
 import datetime
 from pymongo import MongoClient
 

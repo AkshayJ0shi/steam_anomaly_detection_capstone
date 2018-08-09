@@ -1,6 +1,5 @@
 from pymongo import MongoClient
 from urllib.parse import quote_plus as url
-import pandas as pd
 import steam.webauth as wa
 import os
 import ast
