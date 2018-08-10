@@ -6,21 +6,15 @@ import datetime
 
 
 def fromts(ts):
-    """
-    Converts epoch time to a readable date
-    """
+    """ Converts epoch time to a readable date """
     return datetime.datetime.fromtimestamp(ts)
 
 def tots(dt):
-    """
-    Converts time of the form 'Jan 01 2020' to epoch time
-    """
+    """ Converts time of the form 'Jan 01 2020' to epoch time """
     return time.mktime(datetime.datetime.strptime(dt, "%b %d %Y").timetuple())
 
 def fit_moving_average_trend(series, window=7):
-    """
-    Create a series of moving averages
-    """
+    """ Create a series of moving averages """
     return series.rolling(window, center=True).mean()
 
 def plot_raw(series, ax, title='Raw'):
