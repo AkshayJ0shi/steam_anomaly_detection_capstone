@@ -4,7 +4,7 @@
 
 ### How the problem was solved before:
 
-With time series data, there will be seasonal and long term trends that need to be accounted for. After those trends are removed outliers will appear. ARIMA can be used to remove the trends, then HOT SAX, One Class SVM, or KNN can be used to detect outliers or shocks.
+With time series data, there will be seasonal and long term trends that need to be accounted for. ARIMA can be used to remove the trends, then outliers will appear. I found an auto-arima package called [pyramid](https://github.com/tgsmith61591/pyramid) and anomaly detection was solved by [Twitter](https://github.com/twitter/AnomalyDetection), but it only runs in R. Nicolas Steven Miller ported the Twitter anomaly detection from R to Python with [pyculiarity](https://github.com/nicolasmiller/pyculiarity), and I [forked it](https://github.com/mosho-p/pyculiarity) and made some minor changes to make it run on my machine.
 
 ### What's new about my approach and why it will be successful:
 
