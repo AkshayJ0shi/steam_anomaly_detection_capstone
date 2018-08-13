@@ -6,3 +6,12 @@ def to_timeseries(df, item=None):
     df['date'] = [datetime.datetime.fromtimestamp(t) for t in df['date']]
     df.index = df['date']
     return df.median_sell_price
+
+def anomaly_format():
+    pass
+
+def anomaly_vec_format():
+    pass
+
+def arima_format():
+    pass
