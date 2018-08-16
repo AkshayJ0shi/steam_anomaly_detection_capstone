@@ -7,39 +7,22 @@ from sklearn.preprocessing import StandardScaler
 from ts_format import to_ts, from_ts
 
 
-class Dendrogram():
+
+class Dendrogram:
     def __init__(self):
-
-    def make_dendrogram(dataframe, linkage_method='average', metric='cosine', save=False, color_threshold=None):
-        '''
-        This function creates and plots the dendrogram created by hierarchical clustering.
-
-        INPUTS: Pandas Dataframe, string, string, int
-
-        OUTPUTS: None
-        '''
-        df_standard = StandardScaler().fit_transform(dataframe.transpose()).T
-        distxy = squareform(pdist(df_standard.values, metric=metric))
-        Z = linkage(distxy, linkage_method)
-        plt.figure(figsize=(25, 10))
-        plt.title('Hierarchical Clustering Dendrogram')
-        plt.xlabel('sample index')
-        plt.ylabel('distance')
-        dendrogram(
-            Z,
-            leaf_rotation=90.,  # rotates the x axis labels
-            leaf_font_size=6,  # font size for the x axis labels
-            labels=dataframe.index,
-            color_threshold=color_threshold
-        )
-        plt.show()
-        if save:
-            plt.gcf()
-            plt.tight_layout()
-            plt.savefig('dendogram', dpi=400, pad_inches=0)
+        self.df = None
 
 
-    def make_pivot(dataframe, min_price, min_quant, days_dropped, start_date, end_date):
+    def fit(self, df):
+        self.df = df
+        pass
+
+
+    def make_dendrogram(self, linkage_method='average', metric='cosine', save=False, color_threshold=None):
+        make_dendrogram(self.df, linkage_method=linkage_method, metric=metric, save=save, color_threshold=color_threshold)
+
+
+    def make_pivot(self, dataframe, min_price, min_quant, days_dropped, start_date, end_date):
         """
         Makes a pivoted dataframe to be used in the dendrogram.
         :param dataframe: data
@@ -51,13 +34,11 @@ class Dendrogram():
         :return: a pivot of
         """
         df = dataframe.dropna() # make a copy and drop anything that does not have a release date (might remove)
-        # find the minimum quantity and minimum price for each item
-        df['min_quant'] = df.groupby('item_name')['quantity'].transform('min')
-        df['min_price'] = df.groupby('item_name')['median_sell_price'].transform('min')
 
-        # remove all items with price <
-        df = df[df.min_quant > min_quant]
-        df = df[df.min_price > min_price]
+        self._mask_mins(min_price, min_quant)
+
+
+
 
         df['item_index'] = np.nan
         df['item_index'] = df.groupby('item_name').transform(lambda x: np.arange(len(x)))
@@ -75,4 +56,41 @@ class Dendrogram():
         return df_pivot.dropna()
 
 
-    def mask_mins(min_price, min_quant)
+    def _mask_mins(self, min_price, min_quant):
+        # find the minimum quantity and minimum price for each item
+        self.df['min_quant'] = self.df.groupby('item_name')['quantity'].transform('min')
+        self.df['min_price'] = self.df.groupby('item_name')['median_sell_price'].transform('min')
+        # remove all items with price and quant < threshold
+        self.df = self.df[self.df.min_quant > min_quant]
+        self.df = self.df[self.df.min_price > min_price]
+
+
+def make_dendrogram(dataframe, linkage_method='average', metric='cosine', save=False, color_threshold=None):
+    """
+    Plot a dendrogram of standardized data with items as labels
+    :param dataframe: standardized, pivoted dataframe
+    :param linkage_method: linkage type for hierarchical clustering (default 'average')
+    :param metric:
+    :param save:
+    :param color_threshold:
+    :return:
+    """
+
+    distxy = squareform(pdist(dataframe.values, metric=metric))
+    Z = linkage(distxy, linkage_method)
+    plt.figure(figsize=(25, 10))
+    plt.title('Hierarchical Clustering Dendrogram')
+    plt.xlabel('sample index')
+    plt.ylabel('distance')
+    dendrogram(
+        Z,
+        leaf_rotation=90.,  # rotates the x axis labels
+        leaf_font_size=6,  # font size for the x axis labels
+        labels=dataframe.index,
+        color_threshold=color_threshold
+    )
+    plt.show()
+    if save:
+        plt.gcf()
+        plt.tight_layout()
+        plt.savefig('dendogram.png', dpi=400, pad_inches=0)
