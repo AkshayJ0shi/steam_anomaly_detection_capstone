@@ -36,7 +36,7 @@ class Dendrogram:
         :return: a pivot of the fit df with the set of parameters
         """
         self.pivot = self.df.dropna() # make a copy and drop anything that does not have a release date (might remove)
-        self._mask_mins(min_price, min_quant)
+        self.pivot = mask_mins(self.pivot, min_price, min_quant)
 
         self.pivot = self.pivot[self.pivot['days_since_release'] > days_dropped]
         # restrict the df to the specified date range
@@ -55,13 +55,22 @@ class Dendrogram:
         make_dendrogram(self.pivot, linkage_method=linkage_method, metric=metric, save=save, color_threshold=color_threshold)
 
 
-    def _mask_mins(self, min_price, min_quant):
-        # find the minimum quantity and minimum price for each item
-        self.pivot['min_quant'] = self.pivot.groupby('item_name')['quantity'].transform('min')
-        self.pivot['min_price'] = self.pivot.groupby('item_name')['median_sell_price'].transform('min')
-        # remove all items with price and quant < threshold
-        self.pivot = self.pivot[self.pivot.min_quant > min_quant]
-        self.pivot = self.pivot[self.pivot.min_price > min_price]
+def mask_mins(dataframe, min_price, min_quant):
+    """
+    Removes entries with min price or min quantity below the threshold.
+    :param dataframe: df
+    :param min_price: (float) min price the item needs to be kept. Exclusive.
+    :param min_quant: (int) min quantity the item needs to be kept. Exclusive.
+    :return: df
+    """
+    # find the minimum quantity and minimum price for each item
+    df = dataframe.copy()
+    df['min_quant'] = df.groupby('item_name')['quantity'].transform('min')
+    df['min_price'] = df.groupby('item_name')['median_sell_price'].transform('min')
+    # remove all items with price and quant < threshold
+    df = df[df.min_quant > min_quant]
+    df = df[df.min_price > min_price]
+    return df
 
 
 def make_dendrogram(dataframe, linkage_method='average', metric='cosine', save=False, color_threshold=None):
