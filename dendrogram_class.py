@@ -47,8 +47,8 @@ class Dendrogram:
         self.pivot['info'] = self.pivot['item_name'] + ' ' + self.pivot['release_date']
         self.pivot = self.pivot.reset_index().pivot('info', 'date', 'median_sell_price')
         self.pivot = self.pivot.dropna() # remove items that were not release for the full date range
-        self.pivot = pd.DataFrame(StandardScaler().fit_transform(self.pivot.transpose()).T,
-                                  index=self.pivot.index, columns=self.pivot.columns)
+        # self.pivot = pd.DataFrame(StandardScaler().fit_transform(self.pivot.transpose()).T,
+        #                           index=self.pivot.index, columns=self.pivot.columns)
 
 
     def make_dendrogram(self, linkage_method='average', metric='cosine', save=False, color_threshold=None):
