@@ -139,8 +139,8 @@ def get_num_items_per_day():
     return num_items
 
 
-def items_available(timestamp, num_items):
-    return np.max(num_items[num_items['timestamp'] <= timestamp]['total_released'])
+def items_available(ts, num_items):
+    return np.max(num_items[num_items['release_timestamp'] <= ts]['total_released'])
 
 
 def scale_anomalies(anomalies):

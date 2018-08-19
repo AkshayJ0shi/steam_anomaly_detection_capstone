@@ -55,7 +55,7 @@ class Dendrogram:
         make_dendrogram(self.pivot, linkage_method=linkage_method, metric=metric, save=save, color_threshold=color_threshold)
 
 
-def mask_mins(dataframe, min_price, min_quant):
+def mask_mins(dataframe, min_price=0.10, min_quant=30):
     """
     Removes entries with min price or min quantity below the threshold.
     :param dataframe: df
