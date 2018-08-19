@@ -3,6 +3,7 @@ from pyculiarity import detect_ts
 from pyramid.arima import auto_arima
 from collections import defaultdict
 import pandas as pd
+import numpy as np
 from dendrogram_class import mask_mins
 from tqdm import tqdm
 
@@ -76,6 +77,11 @@ def arima_smooth(df):
 
 
 def detect_anoms(dataframe):
+    """
+    Run anomaly detection.
+    :param dataframe: dataframe with 'timestamp' and 'pred_price' columns
+    :return: list of timestamps
+    """
     df = dataframe[['timestamp', 'pred_price']].reset_index(drop=True)
     results = detect_ts(df, max_anoms=0.3, alpha=0.001, direction='both', only_last=None,
                      longterm=True, verbose=True, piecewise_median_period_weeks=3)
@@ -88,7 +94,7 @@ def update_anoms(anom_dict, results, release_date):
     :param anom_dict: current diction of {timestamp: number of anomalies}
     :param results: timestamps to update the anom_dict with
     :param release_date: First date of sale often comes back with an anomaly so I want to filter those.
-    :return:
+    :return: updated dictionary
     """
     if len(results.index)>0:
         for anomaly in results.index:
@@ -114,6 +120,42 @@ def print_top(anoms, n=30, sortByDate=False):
         print(*[(x.date().strftime('%d %b %Y'), y) for x, y in sorted(anoms[:n])], sep='\n')
     else:
         print(*[(x.date().strftime('%d %b %Y'), y) for x, y in anoms[:n]], sep='\n')
+
+
+def get_num_items_per_day():
+    """
+    Creates a dataframe with 'release_timestamp' and 'total_released'.
+    Use items_available() to get the number of items available for sale on that date.
+    :return: df
+    """
+    df_num_items = import_data()
+    df_num_items = df_num_items.groupby('item_name').agg('median')
+    df_num_items['release_timestamp'] = [pd.to_datetime(t, unit='s').date() for t in df_num_items['est_release']]
+    df_num_items = df_num_items.groupby('release_timestamp').count()
+    df_num_items['total_released'] = np.cumsum(df_num_items['median_sell_price'])
+    num_items = df_num_items['total_released']
+    num_items = num_items.reset_index()
+    num_items['release_timestamp'] = [pd.to_datetime(t) for t in num_items['release_timestamp']]
+    return num_items
+
+
+def items_available(timestamp, num_items):
+    return np.max(num_items[num_items['timestamp'] <= timestamp]['total_released'])
+
+
+def scale_anomalies(anomalies):
+    """
+    Take the number of items available for sale on a given date into account. The magnitude of anomalies in 2018 will
+    necessarily be larger than 2014, because there are more items. This divides the count of anomalies by the number
+    of items available on that date to get a more accurate anomaly score.
+    :param anomalies: list of anomalies
+    :return: list of anomalies with scaled scores
+    """
+    num_items = get_num_items_per_day()
+    scaled_anom_dict = {}
+    for ts, count in anomalies:
+        scaled_anom_dict[ts] = count / items_available(ts, num_items)
+    return sort_dict(scaled_anom_dict)
 
 
 
