@@ -17,8 +17,12 @@ def import_data():
         df = pickle.load(f)
     return df
 
+def import_guns():
+    df = import_data()
+    return df[df['gun_bool']]
 
-def filter_data(dataframe, min_price=.1, min_quant=30, days_released=30):
+
+def filter_data(dataframe, min_price=.15, min_quant=30, days_released=45):
     """
     Filter items that don't meet the threshold of price or quantity. Remove the first few days of release where the
     price is always very high.
@@ -33,7 +37,7 @@ def filter_data(dataframe, min_price=.1, min_quant=30, days_released=30):
     return df
 
 
-def anom_consensus(dataframe):
+def anom_consensus(dataframe, arima=True):
     """
     Given a price/quant/release_date filtered DataFrame, run anomaly detection on data that has been smoothed by
     auto arima
@@ -43,10 +47,15 @@ def anom_consensus(dataframe):
     items = dataframe.item_name.unique()
     for item in tqdm(items):
         df, release_date = prep_data(dataframe, item)
-        results = arima_smooth(df)
+        if arima:
+            results = arima_smooth(df)
+        else:
+            result = df[['timestamp', 'median_sell_price']]
+            result.columns = ['timestamp', 'pred_price']
         results = detect_anoms(results)
         anom_dict = update_anoms(anom_dict, results, release_date)
-    return sort_dict(anom_dict)
+    anoms = sort_dict(anom_dict)
+    return scale_anomalies(anoms, dataframe)
 
 
 def prep_data(dataframe, item):
@@ -122,14 +131,13 @@ def print_top(anoms, n=30, sortByDate=False):
         print(*[(x.date().strftime('%d %b %Y'), y) for x, y in anoms[:n]], sep='\n')
 
 
-def get_num_items_per_day():
+def get_num_items_per_day(df):
     """
     Creates a dataframe with 'release_timestamp' and 'total_released'.
     Use items_available() to get the number of items available for sale on that date.
     :return: df
     """
-    df_num_items = import_data()
-    df_num_items = df_num_items.groupby('item_name').agg('median')
+    df_num_items = df.groupby('item_name').agg('median')
     df_num_items['release_timestamp'] = [pd.to_datetime(t, unit='s').date() for t in df_num_items['est_release']]
     df_num_items = df_num_items.groupby('release_timestamp').count()
     df_num_items['total_released'] = np.cumsum(df_num_items['median_sell_price'])
@@ -143,7 +151,7 @@ def items_available(ts, num_items):
     return np.max(num_items[num_items['release_timestamp'] <= ts]['total_released'])
 
 
-def scale_anomalies(anomalies):
+def scale_anomalies(anomalies, df):
     """
     Take the number of items available for sale on a given date into account. The magnitude of anomalies in 2018 will
     necessarily be larger than 2014, because there are more items. This divides the count of anomalies by the number
@@ -151,7 +159,7 @@ def scale_anomalies(anomalies):
     :param anomalies: list of anomalies
     :return: list of anomalies with scaled scores
     """
-    num_items = get_num_items_per_day()
+    num_items = get_num_items_per_day(df)
     scaled_anom_dict = {}
     for ts, count in anomalies:
         scaled_anom_dict[ts] = count / items_available(ts, num_items)
@@ -159,10 +167,10 @@ def scale_anomalies(anomalies):
 
 
 
-# if __name__ == '__main__':
-#     df = import_data()
-#     df = filter_data(df)
-#     anomalies = anom_consensus(df)
-#     with open('anomalies.pkl', 'wb') as f:
-#         pickle.dump(anomalies, f)
-#     print_top(anomalies, n=30)
+if __name__ == '__main__':
+    df = import_guns()
+    df = filter_data(df)
+    anomalies = anom_consensus(df)
+    with open('gun_anomalies.pkl', 'wb') as f:
+        pickle.dump(anomalies, f)
+    print_top(anomalies, n=30)
