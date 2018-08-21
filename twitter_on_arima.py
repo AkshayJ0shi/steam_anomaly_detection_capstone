@@ -50,8 +50,8 @@ def anom_consensus(dataframe, arima=True):
         if arima:
             results = arima_smooth(df)
         else:
-            result = df[['timestamp', 'median_sell_price']]
-            result.columns = ['timestamp', 'pred_price']
+            results = df[['timestamp', 'median_sell_price']]
+            results.columns = ['timestamp', 'pred_price']
         results = detect_anoms(results)
         anom_dict = update_anoms(anom_dict, results, release_date)
     anoms = sort_dict(anom_dict)
@@ -170,7 +170,7 @@ def scale_anomalies(anomalies, df):
 if __name__ == '__main__':
     df = import_guns()
     df = filter_data(df)
-    anomalies = anom_consensus(df)
-    with open('gun_anomalies.pkl', 'wb') as f:
+    anomalies = anom_consensus(df, arima=False)
+    with open('gun_no_arima_anomalies.pkl', 'wb') as f:
         pickle.dump(anomalies, f)
     print_top(anomalies, n=30)
