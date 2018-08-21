@@ -16,7 +16,7 @@ I wanted to gather all of the price history data that the graphs on the Steam Ma
 </p>
 </details>
 
-In the source code I found the API the graphs were drawing from. I used [SteamApis](https://steamapis.com/) to gather the names of every item they tracked on the Market, and fed them into the Steam API call to gather all of the price history data into a MongoDB. This gave me a database that looked like:
+In the source code I found the API the graphs were drawing from. To gather this data systematically, I needed the ID of the game, and the name of the item for all 97,636 items I was after. I found a site [SteamApis](https://steamapis.com/) that had the names of every item for a given game. To get a list of every game that offered items on the Steam Market, I used BeautifulSoup to scrape a dropdown menu in the "Advanced Search" page of the market. With the list of every game, I was able to get a list of every item for each game from SteamAPIs, then use that list of every item to get price history records from Steam. As the price history data came in, I saved it to a MongoDB with the following schema:
 ```
  item_name: string
  game: number
@@ -25,7 +25,10 @@ In the source code I found the API the graphs were drawing from. I used [SteamAp
      median_sell_price: number
      quantity: string
 ```
-Where 'prices' had an entry for each daily record. 
+Where 'prices' had a {date, median_sell_price, quantity} entry for each daily record. 
+
+After working with the data for a while, I learned that not all items were created equally. Some items had special properties (maybe blue/red/green versions of the item) that were sold under the same name, for (sometimes) drastically different prices.
 
 # Anomaly Detection
 <img src='images/workflow_analysis.png' height=80% width=80%>
+I brought the data I'd gathered into Pandas and created a Pickle to easily load the DataFrame without having to go through Mongo.
