@@ -15,7 +15,6 @@ I wanted to gather all of the price history data that the graphs on the Steam Ma
 <img src='images/market_example.png' height=80% width=80%>
 </p>
 </details>
-<br><br>
 
 In the source code I found the API the graphs were drawing from. I used [SteamApis](https://steamapis.com/) to gather the names of every item they tracked on the Market, and fed them into the Steam API call to gather all of the price history data into a MongoDB. This gave me a database that looked like:
 ```
