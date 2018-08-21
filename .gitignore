@@ -8,3 +8,6 @@ steam_capstone/
 data/store_pages/
 test*
 *.pkl
+__pycache__/
+.pyramid-cache/
+

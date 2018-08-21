@@ -1,5 +1,4 @@
 from pymongo import MongoClient
-import pickle
 import pandas as pd
 from tqdm import tqdm
 import time
@@ -20,7 +19,7 @@ def get_cursor(app=None):
     else:
         return collection.find()
 
-
+# Code borrowed from http://deo.im/2016/09/22/Load-data-from-mongodb-to-Pandas-DataFrame/
 def iterator2dataframe(iterator,
                        chunk_size: int,
                        func=None,
@@ -72,8 +71,8 @@ def split_sales_records(record):
             'item_name': record['item_name']}
 
 # Commented out to avoid overwritting
-if __name__ == '__main__':
-    cursor = get_cursor()
-    df = iterator2dataframe(cursor, 20, func=split_sales_records, total=cursor.count())
-    with open('data/all_apps_df.pkl', 'wb') as f:
-        pickle.dump(df, f)
+# if __name__ == '__main__':
+#     cursor = get_cursor()
+#     df = iterator2dataframe(cursor, 20, func=split_sales_records, total=cursor.count())
+#     with open('data/all_apps_df.pkl', 'wb') as f:
+#         pickle.dump(df, f)

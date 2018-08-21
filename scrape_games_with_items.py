@@ -1,9 +1,6 @@
-from bs4 import BeautifulSoup
 import os
 import steam.webauth as wa
-import re
 import ast
-import requests
 import sys
 
 def scrape_page(app_id, session):
