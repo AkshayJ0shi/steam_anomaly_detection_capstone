@@ -78,14 +78,14 @@ Twitter's Anomaly Detection was originally written in R and ported to Python by 
 ### Twitter didn't always work
 The top graph is of a particularly bad example of the anomaly detection function in action. It failed to hit the big drop in price in the middle, and the sharp spike on the right.
 
-<img src='images/detect_bad.png' height=80% width=80%>
+<img src='images/detect_bad.png'>
 
 [Pyramid]() is a Python port of a popular R function auto.arima. This allowed me to automatically fit the best ARIMA parameters to each time series, then run in-sample predictions. I used ARIMA for two reasons:
   1 Smooth each time series to avoid false positives
   2 Incorporate the `quantity` feature into the regression model
 
 This is the same graph after it was fit with ARIMA:
-<img src='images/detect_good.png' height=80% width=80%>
+<img src='images/detect_good.png'>
 
 I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. To do broad investigations of dates, I had a list of dates that the collections of items were released on[1][2], dates of major tournaments[3], and a way to search the Counter Strike SubReddit by date range[4] to see if there were popular posts talking about big events. 
 
