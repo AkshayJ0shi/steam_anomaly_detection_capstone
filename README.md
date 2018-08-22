@@ -87,7 +87,7 @@ The top graph is of a particularly bad example of the anomaly detection function
 This is the same graph after it was fit with ARIMA:
 <img src='images/detect_good.png'>
 
-I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. To do broad investigations of dates, I had a list of dates that the collections of items were released on[&sup1;][&sup2;], dates of major tournaments[&sup3;], and a way to search the Counter Strike SubReddit by date range[&#8308;] to see if there were popular posts talking about big events.
+I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. To do broad investigations of dates, I had a list of dates that the collections of items were released on[&sup1;] [&sup2;], dates of major tournaments[&sup3;], and a way to search the Counter Strike SubReddit by date range[&#8308;] to see if there were popular posts talking about big events.
 
 [&sup1;]: http://p337.info/blog/csgo-case-release-order/
 [&sup2;]: http://p337.info/blog/csgo-operation-release-order/
@@ -105,10 +105,9 @@ This kind of information is useful for companies who rely on revenue from these 
 
 ---
 # Resources
-[Twitter Anomaly Detection]()
+[Twitter Blog](https://blog.twitter.com/engineering/en_us/a/2015/introducing-practical-and-robust-anomaly-detection-in-a-time-series.html)
+[Twitter AnomalyDetection](https://github.com/twitter/AnomalyDetection)
 
-[Pyculiarity](): Python port of Twitter Anomaly Detection
+[Pyculiarity](https://github.com/mosho-p/pyculiarity): my fork of Nicolas Steven Miller's Python port of Twitter Anomaly Detection
 
-[Pyramid](): Python port of R's auto.arima
-
-Twitter papers
+[Pyramid](https://github.com/tgsmith61591/pyramid): Python port of R's auto.arima
