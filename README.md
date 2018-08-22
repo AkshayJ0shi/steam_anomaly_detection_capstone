@@ -133,3 +133,9 @@ In the short term my plans are:
 [Pyculiarity](https://github.com/mosho-p/pyculiarity): my fork of Nicolas Steven Miller's Python port of Twitter Anomaly Detection
 
 [Pyramid](https://github.com/tgsmith61591/pyramid): Python port of R's auto.arima
+
+
+
+[A Novel Technique for Long-Term Anomaly Detection in the Cloud
+Owen Vallis, Jordan Hochenbaum, Arun Kejariwal
+Twitter Inc.](https://www.usenix.org/system/files/conference/hotcloud14/hotcloud14-vallis.pdf)
