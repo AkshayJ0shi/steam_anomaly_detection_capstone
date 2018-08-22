@@ -73,12 +73,21 @@ I performed heirarchical clustering and looked at examples of items that were cl
 
 ### Anomaly Detection
 Many anomaly detection methods only find one anomalous point or rely on knowing the number of anomalies. Largely they use mean and standard deviation to find anomalies, which is inherantly problematic if the time series has many because the mean and standard deviation are sensitive to outliers. Twitter developed an anomaly detection algorithm that replaces mean and standard deviation with median and Median Absolute Deviation. This allows the algorithm to function consistently despite the number or severity of outliers.
+Twitter's Anomaly Detection was originally written in R and ported to Python by Nicolas Steven Miller. The Python port is called [pyculiarity](https://github.com/mosho-p/pyculiarity). It was originally written for Python 2.7 and was not 100% up to date with Python 3.6, so I forked it and made the minor changes necessary.
 
-Twitter didn't always work
+### Twitter didn't always work
+The top graph is of a particularly bad example of the anomaly detection function in action. It failed to hit the big drop in price in the middle, and the sharp spike on the right.
 
-I forked Pyramid and made slight changes that weren't caught when they moved from 2.7 to 3.6 to make it run on my machine. This allowed me to perform auto ARIMA to smooth each time series and incorporate the `quantity` feature.
+<img src='images/detect_bad.png' height=80% width=80%>
 
-I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. To do broad investigations of dates, I had a list of dates that the collections of items were released on[1][2], dates of major tournaments[3], and a way to search the Counter Strike SubReddit by date range[4]. 
+[Pyramid]() is a Python port of a popular R function auto.arima. This allowed me to automatically fit the best ARIMA parameters to each time series, then run in-sample predictions. I used ARIMA for two reasons:
+  1 Smooth each time series to avoid false positives
+  2 Incorporate the `quantity` feature into the regression model
+
+This is the same graph after it was fit with ARIMA:
+<img src='images/detect_good.png' height=80% width=80%>
+
+I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. To do broad investigations of dates, I had a list of dates that the collections of items were released on[1][2], dates of major tournaments[3], and a way to search the Counter Strike SubReddit by date range[4] to see if there were popular posts talking about big events. 
 
 # Results
 ![](./images/results_graph.png)
