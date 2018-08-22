@@ -34,10 +34,9 @@ basic stats on items and games
 After working with the data for a while, I learned that not all items were created equally. Some items had special properties (blue/red/green versions of the item) that were sold under the same name, for (sometimes) drastically different prices. I explored the economies of games and found that Counter Strike: Global Offensive had the third most items, but the most number of transaction and the highest total value over the past year of data. Counter Strike was not without the same issue, but those items were easily filtered out in this case. At this point I decided to just focus on Counter Strike.
 
 # Features
+There were many features I planned to use but did not have time to incorporate. They will be useful when I  future work.
 
-There were many features I planned to use but did not have time to incorporate. They will be useful for future work though.
-
-My final feature space:
+The features I used most frequently were:
   * Item name / Description (concatenation of item name and release date)
   * Date of sale (Unix Time)
   * Date of sale (Timestamp)
@@ -49,7 +48,7 @@ My final feature space:
 ### Datetimes
 <img src='https://i.stack.imgur.com/uiXQd.png' height=75% width=75% ALIGN='right'>
 
-Woof. There sure are a lot of different (and frustratingly incompatible) formats dates can appear in.
+Woof. There sure are a lot of different (and frustratingly incompatible) formats that dates can appear in.
   * String
   * Datetime
   * Timestamp
@@ -75,7 +74,7 @@ Many anomaly detection methods only find one anomalous point or rely on knowing 
 
 Twitter didn't always work
 
-I forked Pyramid and made slight changes that weren't caught when they moved from 2.7 to 3.6 to make it run on my machine.
+I forked Pyramid and made slight changes that weren't caught when they moved from 2.7 to 3.6 to make it run on my machine. This allowed me to perform auto ARIMA to smooth each time series and incorporate the `quantity` feature.
 
 I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. I had a list of dates that the collections of items were released on, dates of major tournaments, and a way to search Reddit by date range. I investigated 25 dates with the highest anomaly score, and found that many of them occured with the release of new items.
 
@@ -89,4 +88,5 @@ This kind of information is useful for companies who rely on revenue from these 
 ---
 # References
 Twitter repo
+
 Pyramid repo
