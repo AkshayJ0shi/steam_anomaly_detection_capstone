@@ -29,10 +29,15 @@ In the source code I was able to find the API the price history graphs were draw
 Where 'prices' had a {date, median_sell_price, quantity} entry for each daily record. I transfered the data I'd gathered into Pandas and created a Pickle to easily load the DataFrame without having to query Mongo.
 
 # Exploration
-basic stats on items and games
+After working with the data for a while, I learned that not all items were created equally. Some items had special properties (blue/red/green versions of the item) that were sold under the same name, for (sometimes) drastically different prices. I explored the economies of games and found that Counter-Strike: Global Offensive had the third most items, but the most number of transaction and the highest total value over the past year of data. Counter-Strike was not without the same issue, but those items were easily filtered out in this case. At this point I decided to just focus on Counter-Strike.
 
-After working with the data for a while, I learned that not all items were created equally. Some items had special properties (blue/red/green versions of the item) that were sold under the same name, for (sometimes) drastically different prices. I explored the economies of games and found that Counter Strike: Global Offensive had the third most items, but the most number of transaction and the highest total value over the past year of data. Counter Strike was not without the same issue, but those items were easily filtered out in this case. At this point I decided to just focus on Counter Strike.
-
+##### Fun facts about Counter-Strike: Global Offensive  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Between the time the first item was released and now (August 13, 2013 - June 30, 2018):
+  * There are ~10,750 items on the market-place
+  * The number of transactions between players is > 1.6B
+  * The total amount of money traded between players is > 2.1B (estimated by the median price per day and quantity)
+  * Valve (the company that owns Steam and Counter-Strike) takes 15% of every transaction, earning them > $322.7M
+  
 # Features
 There were many features I planned to use but did not have time to incorporate into my current model. They will be useful in my continued work when I update the ARIMA model to include more features or cluster items to run adjusted models on subsets of my data.
 
