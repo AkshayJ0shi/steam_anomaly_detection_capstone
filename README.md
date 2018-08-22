@@ -35,7 +35,7 @@ After working with the data for a while, I learned that not all items were creat
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Between the time the first item was released and now (August 13, 2013 - June 30, 2018):
   * There are ~10,750 items on the market-place
   * The number of transactions between players is > 1.6B
-  * The total amount of money traded between players is > 2.1B (estimated by the median price per day and quantity)
+  * The total amount of money traded between players is > 2.1B (estimated by quantity * median price per day)
   * Valve (the company that owns Steam and Counter-Strike) takes 15% of every transaction, earning them > $322.7M
   
 # Features
