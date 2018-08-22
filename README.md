@@ -17,7 +17,7 @@ I wanted to gather all of the price history data for every item on the Steam Mar
 <img src='images/market_example.png' height=80% width=80%>
 </details>
 
-In the source code I was able to find the API the price history graphs were drawing from. To gather this data systematically, I needed the ID of the game, and the name of the item for all 97,636 items I was after. I found a site [SteamApis](https://steamapis.com/) that had the names of every item for a given game. To get a list of every game that offered items on the Steam Market, I used BeautifulSoup to scrape a dropdown menu in the "Advanced Search" page of the market. With the list of every game, I was able to get a list of every item for each game from SteamAPIs, then use that list of every item to get price history records from Steam. As the price history data came in, I saved it to a MongoDB with the following schema:
+In the source code I was able to find the API the price history graphs were drawing from. To gather this data systematically, I needed the ID of the game and the name of the item for all 97,636 items I was after. I found a site [SteamApis](https://steamapis.com/) that had the names of every item for a given game. To get a list of every game that offered items on the Steam Market, I used BeautifulSoup to scrape a dropdown menu in the "Advanced Search" page of the market. With the list of game IDs, I was able to get a list of every item for each game from SteamAPIs, then use that list of items to get price history records from Steam. As the price history data came in, I saved it to a MongoDB with the following schema:
 ```
  item_name: string
  game: number
@@ -42,21 +42,25 @@ After working with the data for a while, I learned that not all items were creat
 There were many features I planned to use but did not have time to incorporate into my current model. They will be useful in my continued work when I update the ARIMA model to include more features or cluster items to run adjusted models on subsets of my data.
 
 The features I used most frequently were:
-  * Item name / Description (concatenation of item name and release date for investigation purposes)
-  * Date of sale (Unix Time)
-  * Date of sale (Timestamp)
-  * Median sell price
-  * Quantity
-  * Estimated release date (by the first sale date for the item)
-  * Days since release
+```
+  Item name / Description (concatenation of item name and release date for investigation purposes)
+  Date of sale (Unix Time)
+  Date of sale (Timestamp)
+  Median sell price
+  Quantity
+  Minimum sell price
+  Minimum quantity
+  Estimated release date (by the first sale date for the item)
+  Days since release
+  ```
 
-### Datetimes
+#### Datetimes
 <img src='images/Bane_breaks_Batman.png' height=30% width=30% ALIGN='right'>
 
 Woof. There sure are a lot of different (and frustratingly incompatible) formats that dates can appear in.
   * String
   * Datetime
-  * Timestamp
+  * pd.Timestamp
   * np.datetime64
   * Unix time (float)
   * DateTimeIndex
@@ -77,7 +81,12 @@ I performed heirarchical clustering and looked at examples of items that were cl
 Many anomaly detection methods only find one anomalous point or rely on knowing the number of anomalies. Largely they use mean and standard deviation to find anomalies, which is inherantly problematic if the time series has many because the mean and standard deviation are sensitive to outliers. Twitter developed an anomaly detection algorithm that replaces mean and standard deviation with median and Median Absolute Deviation. This allows the algorithm to function consistently despite the number or severity of outliers.
 Twitter's Anomaly Detection was originally written in R and ported to Python by Nicolas Steven Miller. The Python port is called [pyculiarity](https://github.com/mosho-p/pyculiarity). It was originally written for Python 2.7 and was not 100% up to date with Python 3.6, so I forked it and made the minor changes necessary.
 
-### Twitter didn't always work
+### Filtering
+There were a couple of factors that I had to take into account at this point as far as useful data.
+  1 The minimum sale price for an item is $0.03 (1 cent to Steam, 1 cent to the game developer, and 1 cent to the seller), so if an item ever reached the minimum sell price, there would be no way for it to go lower and exhibit anomalies. I established a parameter to set the minimum 
+  2  Almost universally, when items first come out
+
+### Twitter doesn't always work
 This is a graph of a particularly bad example of the anomaly detection function in action. It failed to hit the big drop in price in the middle, and the sharp spike on the right.
 
 <img src='images/detect_bad.png'>
