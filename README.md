@@ -73,10 +73,11 @@ Some of these have underlying timezones associated with them. Sometimes it's GMT
 ## The Plan
 My plan was to run some kind of anomaly detection on every item's time series, aggregate the results, and categorize every date as anomalous or normal. Before I went too far, I wanted to make sure items actually did follow common trends, or have common anomalies. 
 
-### Clustering
 <img src='images/clustered_items_scaled.png' height=80% width=80% ALIGN='right'>
-I performed heirarchical clustering and looked at examples of items that were clustered tightly. 
 
+### Clustering
+
+I performed heirarchical clustering and looked at examples of items that were clustered tightly. 
 
 As you can see in this example of three items (with standardized mean and standard deviation), their prices move similarly, and price changes that look anomalous appear in the same places.
 
