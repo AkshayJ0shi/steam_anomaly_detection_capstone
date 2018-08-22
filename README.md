@@ -46,7 +46,7 @@ The features I used most frequently were:
   * Days since release
 
 ### Datetimes
-<img src='bane_breaks_batman.png' height=75% width=75% ALIGN='right'>
+<img src='Bane_breaks_Batman.png' height=75% width=75% ALIGN='right'>
 
 Woof. There sure are a lot of different (and frustratingly incompatible) formats that dates can appear in.
   * String
