@@ -111,6 +111,7 @@ def update_anoms(anom_dict, results, release_date):
     if len(results.index)>0:
         for anomaly in results.index:
             if anomaly != release_date:
+                # possibly update with functionality that gives more weight to anomalies with larger quantity
                 # anom_dict[anomaly] += temp_df[[datetime.datetime.fromtimestamp(t) == anomaly for t in temp_df.date]].quantity.values[0]
                 anom_dict[anomaly] += 1
     return anom_dict
@@ -170,6 +171,16 @@ def scale_anomalies(anomalies, df):
 
 
 def run_detection(filename, guns_only=False, min_price=.15, min_quant=30, days_released=45, arima=True):
+    """
+    Make it easy to run in one line without forgetting to filter or change the filename
+    :param filename:
+    :param guns_only:
+    :param min_price:
+    :param min_quant:
+    :param days_released:
+    :param arima:
+    :return:
+    """
     df = import_data(guns_only=guns_only)
     df = filter_data(df, min_price=min_price, min_quant=min_quant, days_released=days_released)
     anomalies = anom_consensus(df, arima=arima)
