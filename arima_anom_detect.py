@@ -152,7 +152,10 @@ def get_num_items_per_day(df):
     return num_items
 
 
-def items_available(ts, num_items):
+def _items_available(ts, num_items):
+    """
+    Returns number of items available on a given day, with the given get_num_items_per_day(df)
+    """
     return np.max(num_items[num_items['release_timestamp'] <= ts]['total_released'])
 
 
@@ -167,7 +170,7 @@ def scale_anomalies(anomalies, df):
     num_items = get_num_items_per_day(df)
     scaled_anom_dict = {}
     for ts, count in anomalies:
-        scaled_anom_dict[ts] = count / items_available(ts, num_items)
+        scaled_anom_dict[ts] = count / _items_available(ts, num_items)
     return sort_dict(scaled_anom_dict)
 
 

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.spatial.distance import pdist, squareform
 from sklearn.preprocessing import StandardScaler
-from ts_format import to_ts, from_ts
+from date_util import string_to_epoch
 
 
 
@@ -41,7 +41,8 @@ class Dendrogram:
         self.pivot = self.pivot[self.pivot['days_since_release'] > days_dropped]
         # restrict the df to the specified date range
         if type(start_date) == str:
-            self.pivot = self.pivot[[(x >= to_ts(start_date)) and (x <= to_ts(end_date)) for x in self.pivot.date]]
+            self.pivot = self.pivot[[(x >= string_to_epoch(start_date, format='%b %d %Y')) \
+                                     and (x <= string_to_epoch(end_date, format='%b %d %Y')) for x in self.pivot.date]]
         else:
             self.pivot = self.pivot[[(x >= start_date) and (x <= end_date) for x in self.pivot.date]]
         self.pivot['info'] = self.pivot['item_name'] + ' ' + self.pivot['release_date']
@@ -56,7 +57,7 @@ class Dendrogram:
         make_dendrogram(self.pivot, linkage_method=linkage_method, metric=metric, save=save, color_threshold=color_threshold)
 
 
-def mask_mins(dataframe, min_price=.15, min_quant=30, days_released=45):
+def mask_mins(dataframe, min_price=.15, min_quant=30, days_released=60):
     """
     Filter items that don't meet the threshold of price or quantity. Remove the first few days of release where the
     price is always very high.
