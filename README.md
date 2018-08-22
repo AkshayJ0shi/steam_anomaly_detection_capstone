@@ -31,7 +31,7 @@ Where 'prices' had a {date, median_sell_price, quantity} entry for each daily re
 # Exploration
 After working with the data for a while, I learned that not all items were created equally. Some items had special properties (blue/red/green versions of the item) that were sold under the same name, for (sometimes) drastically different prices. I explored the economies of games and found that Counter-Strike: Global Offensive had the third most items, but the most number of transaction and the highest total value over the past year of data. Counter-Strike was not without the same issue, but those items were easily filtered out in this case. At this point I decided to just focus on Counter-Strike.
 
-##### Fun facts about Counter-Strike: Global Offensive  
+#### Fun facts about Counter-Strike: Global Offensive  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Between the time the first item was released and now (August 13, 2013 - June 30, 2018):
   * There are ~10,750 items on the market-place
   * The number of transactions between players is > 1.6B
