@@ -87,11 +87,12 @@ The top graph is of a particularly bad example of the anomaly detection function
 This is the same graph after it was fit with ARIMA:
 <img src='images/detect_good.png'>
 
-I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. To do broad investigations of dates, I had a list of dates that the collections of items were released on[&sup1;][&sup2;], dates of major tournaments[&sup3;], and a way to search the Counter Strike SubReddit by date range[&sup4;] to see if there were popular posts talking about big events.
+I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. To do broad investigations of dates, I had a list of dates that the collections of items were released on[&sup1;][&sup2;], dates of major tournaments[&sup3;], and a way to search the Counter Strike SubReddit by date range[&#8308;] to see if there were popular posts talking about big events.
+
 [&sup1;]: http://p337.info/blog/csgo-case-release-order/
 [&sup2;]: http://p337.info/blog/csgo-operation-release-order/
 [&sup3;]: https://liquipedia.net/counterstrike/Majors#List_of_CS:GO_Major_Championships
-[&sup4;]: http://redditsearch.io/?term=&dataviz=false&aggs=false&subreddits=globaloffensive&searchtype=posts&search=true&start=1534833735&end=1534920135&size=100
+[&#8308;]: http://redditsearch.io/?term=&dataviz=false&aggs=false&subreddits=globaloffensive&searchtype=posts&search=true&start=1534833735&end=1534920135&size=100
 
 # Results
 ![](./images/results_graph.png)
