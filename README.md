@@ -87,23 +87,27 @@ The top graph is of a particularly bad example of the anomaly detection function
 This is the same graph after it was fit with ARIMA:
 <img src='images/detect_good.png'>
 
-I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. To do broad investigations of dates, I had a list of dates that the collections of items were released on[1][2], dates of major tournaments[3], and a way to search the Counter Strike SubReddit by date range[4] to see if there were popular posts talking about big events. 
+I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. To do broad investigations of dates, I had a list of dates that the collections of items were released on[&sup1;][&sup2;], dates of major tournaments[&sup3;], and a way to search the Counter Strike SubReddit by date range[&sup4;] to see if there were popular posts talking about big events.
+[&sup1;]: http://p337.info/blog/csgo-case-release-order/
+[&sup2;]: http://p337.info/blog/csgo-operation-release-order/
+[&sup3;]: https://liquipedia.net/counterstrike/Majors#List_of_CS:GO_Major_Championships
+[&sup4;]: http://redditsearch.io/?term=&dataviz=false&aggs=false&subreddits=globaloffensive&searchtype=posts&search=true&start=1534833735&end=1534920135&size=100
 
 # Results
 ![](./images/results_graph.png)
 
 I investigated 25 dates with the highest anomaly score, and found that many of them occured with the release of new items. When I varied the parameters of the anomaly detection function, or minimum price/quantity/days on the market thresholds, many of the top anomalous dates changes, except anomalies in late November 2016 and late May 2017 seemed to show up every time. The anomalies in May 2017 corresponded with the release of new items, but I want to look more into it to see why it would be more prevalent than other release dates. It is not immediately obvious why anomalies consistantly show up in late November 2016, but I want to investigate that further.
 
-This kind of information is useful for companies who rely on revenue from these items to be able to plan based on their estimated income. Some games, like Team Fortress 2, are free-to-play and their revenue stream relies almost soley around these items.
+This kind of information is useful for companies who rely on revenue from these items to be able to plan based on their estimated income, especially for games which are free-to-play like Team Fortress 2. Their revenue stream relies almost entirely around these items.
 
 # Future Work
 
 ---
-# References
-Twitter repo
+# Resources
+[Twitter Anomaly Detection]()
 
-Pyramid repo
+[Pyculiarity](): Python port of Twitter Anomaly Detection
+
+[Pyramid](): Python port of R's auto.arima
 
 Twitter papers
-
-resources [1][2][3][4]
