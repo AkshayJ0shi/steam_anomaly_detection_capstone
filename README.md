@@ -10,7 +10,6 @@ The presentation can be viewed in [Google Slides](https://docs.google.com/presen
 [Steam](https://store.steampowered.com/) is the largest digital video game distribution platform. A subset of games on Steam include items that can be found in-game and sold to other players on [Steam's Community Market](https://steamcommunity.com/market/). My hypothesis was that significant events in the community (new item releases, big updates, tournaments, etc.) would affect the prices of these items. My goal was to detect anomalies in the market and investigate those dates to see if they did in fact correspond to events.
 
 
-
 # Data Gathering
 <img src='images/workflow_data_gathering.png' height=80% width=80%>
 I wanted to gather all of the price history data for every item on the Steam Market pages.
@@ -29,30 +28,23 @@ In the source code I was able to find the API the graphs were drawing from. To g
 ```
 Where 'prices' had a {date, median_sell_price, quantity} entry for each daily record. I transfered the data I'd gathered into Pandas and created a Pickle to easily load the DataFrame without having to query Mongo.
 
+# Exploration
+basic stats on items and games
+
 After working with the data for a while, I learned that not all items were created equally. Some items had special properties (blue/red/green versions of the item) that were sold under the same name, for (sometimes) drastically different prices. I explored the economies of games and found that Counter Strike: Global Offensive had the third most items, but the most number of transaction and the highest total value over the past year of data. Counter Strike was not without the same issue, but those items were easily filtered out in this case. At this point I decided to just focus on Counter Strike.
 
 # Features
-Long story short: I collected many features that I did not end up using. It's likely I will use some of these in future work I do with this project, but gathering more data should not have been a priority in the early stages of the project.
 
-<details><summary>(Details on features I gathered but did not use)</summary>
+There were many features I planned to use but did not have time to incorporate. They will be useful for future work though.
 
-Originally I thought I would have time to cluster my data based on different features, incorporate 
- 
- 
-I wanted the date of release for every item for the purpose of clustering. This information was surprisingly difficult to find, as there was no resource that listed each item with the release date. I learned that items were released in collections, so I was able to find one site that had the release date of each collection, and a second site with a list of which items appeared in each collection. I combined the data sets and with string matching I was able to connect the items with their release dates.
-
-
-Unfortunately this was not a perfect solution. I discovered that my pattern matching did not work perfectly. "P2000 | Imperial" matched both "StatTrak P2000 | Imperial (Minimal Wear)" (as I wanted it to) and "StatTrak P2000 | Imperial Dragon (Minimal Wear)" (a different item). There were also certain types of items that were not released with these collections.
-</details>
-
-The features I ended up using were:
-  * Item name
-  * Date
+My final feature space:
+  * Item name / Description (concatenation of item name and release date)
+  * Date of sale (Unix Time)
+  * Date of sale (Timestamp)
   * Median sell price
   * Quantity
   * Estimated release date (by the first sale date for the item)
   * Days since release
-  * Description (concatenation of item name and release date)
 
 ### Datetimes
 <img src='https://i.stack.imgur.com/uiXQd.png' height=75% width=75% ALIGN='right'>
@@ -65,7 +57,7 @@ Woof. There sure are a lot of different (and frustratingly incompatible) formats
   * Unix time (float)
   * DateTimeIndex
  
-Some of these have underly timezones associated with them. Sometimes it's GMT and sometimes it's the local timezone. My data was stored in a different format than ARIMA took, which was a different format than the anomaly detection function took. I created `date_util.py` to help convert between them.
+Some of these have underly timezones associated with them. Sometimes it's GMT and sometimes it's the local timezone. My data was stored in a different format than ARIMA took, which was a different format than the anomaly detection function took. I created [`date_util.py`](date_util.py) to help convert between them.
 
 [figure source](https://stackoverflow.com/a/21916253)
 
