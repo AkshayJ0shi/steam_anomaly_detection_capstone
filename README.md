@@ -17,7 +17,7 @@ I wanted to gather all of the price history data for every item on the Steam Mar
 <img src='images/market_example.png' height=80% width=80%>
 </details>
 
-In the source code I was able to find the API the graphs were drawing from. To gather this data systematically, I needed the ID of the game, and the name of the item for all 97,636 items I was after. I found a site [SteamApis](https://steamapis.com/) that had the names of every item for a given game. To get a list of every game that offered items on the Steam Market, I used BeautifulSoup to scrape a dropdown menu in the "Advanced Search" page of the market. With the list of every game, I was able to get a list of every item for each game from SteamAPIs, then use that list of every item to get price history records from Steam. As the price history data came in, I saved it to a MongoDB with the following schema:
+In the source code I was able to find the API the price history graphs were drawing from. To gather this data systematically, I needed the ID of the game, and the name of the item for all 97,636 items I was after. I found a site [SteamApis](https://steamapis.com/) that had the names of every item for a given game. To get a list of every game that offered items on the Steam Market, I used BeautifulSoup to scrape a dropdown menu in the "Advanced Search" page of the market. With the list of every game, I was able to get a list of every item for each game from SteamAPIs, then use that list of every item to get price history records from Steam. As the price history data came in, I saved it to a MongoDB with the following schema:
 ```
  item_name: string
  game: number
@@ -67,7 +67,9 @@ Some of these have underly timezones associated with them. Sometimes it's GMT an
 My plan was to run some kind of anomaly detection on every item's time series, aggregate the results, and categorize every date as anomalous or normal. Before I went too far, I wanted to make sure items actually did follow common trends, or have common anomalies. 
 
 ### Clustering
+<img src='images/clustered_items_scaled.png' height=80% width=80% ALIGN='right'>
 I performed heirarchical clustering and looked at examples of items that were clustered tightly. As you can see in this example of three items (with standardized mean and standard deviation), their prices move similarly, and price changes that look anomalous appear in the same places.
+
 
 ### Anomaly Detection
 Many anomaly detection methods only find one anomalous point or rely on knowing the number of anomalies. Largely they use mean and standard deviation to find anomalies, which is inherantly problematic if the time series has many because the mean and standard deviation are sensitive to outliers. Twitter developed an anomaly detection algorithm that replaces mean and standard deviation with median and Median Absolute Deviation. This allows the algorithm to function consistently despite the number or severity of outliers.
@@ -76,10 +78,12 @@ Twitter didn't always work
 
 I forked Pyramid and made slight changes that weren't caught when they moved from 2.7 to 3.6 to make it run on my machine. This allowed me to perform auto ARIMA to smooth each time series and incorporate the `quantity` feature.
 
-I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. I had a list of dates that the collections of items were released on, dates of major tournaments, and a way to search Reddit by date range. I investigated 25 dates with the highest anomaly score, and found that many of them occured with the release of new items.
+I gave each date an anomaly score which was the number of items tagged with anomalies on that date, divided by the number of items on the market on that day. This gave the percent of items tagged with anomalies for each day. To do broad investigations of dates, I had a list of dates that the collections of items were released on[1][2], dates of major tournaments[3], and a way to search the Counter Strike SubReddit by date range[4]. 
 
 # Results
 ![](./images/results_graph.png)
+
+I investigated 25 dates with the highest anomaly score, and found that many of them occured with the release of new items. When I varied the parameters of the anomaly detection function, or minimum price/quantity/days on the market thresholds, many of the top anomalous dates changes, except anomalies in late November 2016 and late May 2017 seemed to show up every time. The anomalies in May 2017 corresponded with the release of new items, but I want to look more into it to see why it would be more prevalent than other release dates. It is not immediately obvious why anomalies consistantly show up in late November 2016, but I want to investigate that further.
 
 This kind of information is useful for companies who rely on revenue from these items to be able to plan based on their estimated income. Some games, like Team Fortress 2, are free-to-play and their revenue stream relies almost soley around these items.
 
@@ -90,3 +94,7 @@ This kind of information is useful for companies who rely on revenue from these 
 Twitter repo
 
 Pyramid repo
+
+Twitter papers
+
+resources [1][2][3][4]
