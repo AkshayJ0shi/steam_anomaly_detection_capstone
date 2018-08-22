@@ -76,7 +76,6 @@ My plan was to run some kind of anomaly detection on every item's time series, a
 <img src='images/clustered_items_scaled.png' height=80% width=80% ALIGN='right'>
 
 ### Clustering
-
 I performed heirarchical clustering and looked at examples of items that were clustered tightly. 
 
 As you can see in this example of three items (with standardized mean and standard deviation), their prices move similarly, and price changes that look anomalous appear in the same places.
@@ -89,7 +88,7 @@ Twitter's Anomaly Detection was originally written in R and ported to Python by 
 There were a couple of factors that I had to take into account at this point as far as useful data.
   1. The minimum sale price for an item is $0.03 (1 cent to Steam, 1 cent to the game developer, and 1 cent to the seller), so if an item ever reached the minimum sell price, there would be no way for it to go lower and exhibit anomalies. I established a parameter to set the minimum threshold.
   2.  Almost universally, when items first come out they are far more expensive than they are a few days later. Part of what I wanted to investigate is whether new item releases affect the price of items that are already on the market. If the first several points in a time series are all marked as anomalies, my results will show new item releases as being anomalous whether they are or not, so I set up a parameter to removed the first _n_ days of sale.
-  3. I had to take into account
+  3. I took into account the fact that some items would sell infrequently and have a higher variance in price, as well as missing values. I created a parameter to remove items whose minimum quantity drops below a certain threshold.
 
 ### Twitter doesn't always work
 This is a graph of a particularly bad example of the anomaly detection function in action. It failed to hit the big drop in price in the middle, and the sharp spike on the right.
@@ -136,9 +135,7 @@ In the short term my plans are:
 
 [Automatic Anomaly Detection in the Cloud
 Via Statistical Learning
-
 Jordan Hochenbaum Owen S. Vallis Arun Kejariwal
-
 Twitter Inc.](https://arxiv.org/pdf/1704.07706.pdf)
 
 [A Novel Technique for Long-Term Anomaly Detection in the Cloud
