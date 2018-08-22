@@ -4,6 +4,7 @@
 *.bak
 *.swp
 .DS_Store
+archive/
 steam_capstone/
 data/store_pages/
 test*
