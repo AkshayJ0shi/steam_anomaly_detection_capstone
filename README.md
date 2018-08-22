@@ -134,7 +134,12 @@ In the short term my plans are:
 
 [Pyramid](https://github.com/tgsmith61591/pyramid): Python port of R's auto.arima
 
+[Automatic Anomaly Detection in the Cloud
+Via Statistical Learning
 
+Jordan Hochenbaum Owen S. Vallis Arun Kejariwal
+
+Twitter Inc.](https://arxiv.org/pdf/1704.07706.pdf)
 
 [A Novel Technique for Long-Term Anomaly Detection in the Cloud
 Owen Vallis, Jordan Hochenbaum, Arun Kejariwal
