@@ -4,6 +4,7 @@ from pyramid.arima import auto_arima
 from collections import defaultdict
 import pandas as pd
 import numpy as np
+from datetime import datetime
 from tqdm import tqdm
 
 
@@ -188,6 +189,22 @@ def run_detection(filename, guns_only=False, min_price=.15, min_quant=30, days_r
     #with open('anomalies.pkl', 'wb') as f:
         pickle.dump(anomalies, f)
     return anomalies
+
+
+# This and some of the other filtering functions should be in a separate file
+def remove_non_daily(original_df):
+    """
+    Removes items that were not sold every day since they were released. I want consistant time series deltas. It is
+    unlikely that any items would make the cut from remove_low_quantity but not be sold every day.
+    :param original_df: dataframe
+    :return: copy of original_df without items that were not sold every day
+    """
+    df = original_df.copy()
+    df['date'] = [np.datetime64(datetime.fromtimestamp(t).date()) for t in df['date']]
+    df['date_diff'] = df.groupby('item_name')['date'].diff()
+    df['max_diff'] = df.groupby('item_name')['date_diff'].transform('max')
+    return original_df[df.max_diff == pd.Timedelta('1 days 00:00:00')]
+###############
 
 
 if __name__ == '__main__':

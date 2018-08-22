@@ -24,7 +24,7 @@ class Dendrogram:
 
 
     def make_pivot(self, min_price=0.03, min_quant=40, days_dropped=100,
-                   start_date='Jan 01 2017', end_date='Dec 31 2017', total_days=None):
+                   start_date='Jan 01 2017', end_date='Dec 31 2017', scale=False, total_days=None):
         """
         Makes a pivoted dataframe to be used in the dendrogram.
         :param min_price: (float) min price the item needs to be kept. Exclusive.
@@ -32,12 +32,12 @@ class Dendrogram:
         :param days_dropped: (int) number of days after the release date of the item to remove
         :param start_date: (timeseries or 'Jan 01 2020')
         :param end_date: (timeseries or 'Jan 01 2020')
+        :param scale: (bool) whether or not to Standardize the data
         :param total_days: shifts the time serieses to line up on day released
         :return: a pivot of the fit df with the set of parameters
         """
         self.pivot = self.df.dropna() # make a copy and drop anything that does not have a release date (might remove)
         self.pivot = mask_mins(self.pivot, min_price, min_quant)
-
         self.pivot = self.pivot[self.pivot['days_since_release'] > days_dropped]
         # restrict the df to the specified date range
         if type(start_date) == str:
@@ -47,20 +47,23 @@ class Dendrogram:
         self.pivot['info'] = self.pivot['item_name'] + ' ' + self.pivot['release_date']
         self.pivot = self.pivot.reset_index().pivot('info', 'date', 'median_sell_price')
         self.pivot = self.pivot.dropna() # remove items that were not release for the full date range
-        # self.pivot = pd.DataFrame(StandardScaler().fit_transform(self.pivot.transpose()).T,
-        #                           index=self.pivot.index, columns=self.pivot.columns)
+        if scale:
+            self.pivot = pd.DataFrame(StandardScaler().fit_transform(self.pivot.transpose()).T,
+                                  index=self.pivot.index, columns=self.pivot.columns)
 
 
     def make_dendrogram(self, linkage_method='average', metric='cosine', save=False, color_threshold=None):
         make_dendrogram(self.pivot, linkage_method=linkage_method, metric=metric, save=save, color_threshold=color_threshold)
 
 
-def mask_mins(dataframe, min_price=0.10, min_quant=30):
+def mask_mins(dataframe, min_price=.15, min_quant=30, days_released=45):
     """
-    Removes entries with min price or min quantity below the threshold.
+    Filter items that don't meet the threshold of price or quantity. Remove the first few days of release where the
+    price is always very high.
     :param dataframe: df
     :param min_price: (float) min price the item needs to be kept. Exclusive.
     :param min_quant: (int) min quantity the item needs to be kept. Exclusive.
+    :param days_released: (int) Remove the first few days of release where the price is always very high.
     :return: df
     """
     # find the minimum quantity and minimum price for each item
@@ -70,7 +73,8 @@ def mask_mins(dataframe, min_price=0.10, min_quant=30):
     # remove all items with price and quant < threshold
     df = df[df.min_quant > min_quant]
     df = df[df.min_price > min_price]
-    return df
+    #remove the first 'days_released' number of items
+    return df[df.days_since_release > days_released]
 
 
 def make_dendrogram(dataframe, linkage_method='average', metric='cosine', save=False, color_threshold=None):
