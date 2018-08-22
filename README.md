@@ -77,6 +77,7 @@ My plan was to run some kind of anomaly detection on every item's time series, a
 <img src='images/clustered_items_scaled.png' height=80% width=80% ALIGN='right'>
 I performed heirarchical clustering and looked at examples of items that were clustered tightly. 
 
+
 As you can see in this example of three items (with standardized mean and standard deviation), their prices move similarly, and price changes that look anomalous appear in the same places.
 
 ### Anomaly Detection
