@@ -83,8 +83,9 @@ Twitter's Anomaly Detection was originally written in R and ported to Python by 
 
 ### Filtering
 There were a couple of factors that I had to take into account at this point as far as useful data.
-  1 The minimum sale price for an item is $0.03 (1 cent to Steam, 1 cent to the game developer, and 1 cent to the seller), so if an item ever reached the minimum sell price, there would be no way for it to go lower and exhibit anomalies. I established a parameter to set the minimum 
-  2  Almost universally, when items first come out
+  1. The minimum sale price for an item is $0.03 (1 cent to Steam, 1 cent to the game developer, and 1 cent to the seller), so if an item ever reached the minimum sell price, there would be no way for it to go lower and exhibit anomalies. I established a parameter to set the minimum threshold.
+  2.  Almost universally, when items first come out they are far more expensive than they are a few days later. Part of what I wanted to investigate is whether new item releases affect the price of items that are already on the market. If the first several points in a time series are all marked as anomalies, my results will show new item releases as being anomalous whether they are or not, so I set up a parameter to removed the first _n_ days of sale.
+  3. I had to take into account
 
 ### Twitter doesn't always work
 This is a graph of a particularly bad example of the anomaly detection function in action. It failed to hit the big drop in price in the middle, and the sharp spike on the right.
@@ -92,8 +93,8 @@ This is a graph of a particularly bad example of the anomaly detection function 
 <img src='images/detect_bad.png'>
 
 [Pyramid]() is a Python port of a popular R function auto.arima. This allowed me to automatically fit the best ARIMA parameters to each time series, then run in-sample predictions. I used ARIMA for two reasons:
-  1 Smooth each time series to avoid false positives
-  2 Incorporate the `quantity` feature into the regression model
+  1. Smooth each time series to avoid false positives
+  2. Incorporate the `quantity` feature into the regression model
 
 This is what anomaly detection resulted in after the time series was fit with ARIMA:
 <img src='images/detect_good.png'>
