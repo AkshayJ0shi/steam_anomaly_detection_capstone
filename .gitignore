@@ -11,4 +11,4 @@ test*
 *.pkl
 __pycache__/
 .pyramid-cache/
-
+data/games_with_items

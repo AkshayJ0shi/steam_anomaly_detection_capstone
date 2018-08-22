@@ -4,22 +4,19 @@ from pyramid.arima import auto_arima
 from collections import defaultdict
 import pandas as pd
 import numpy as np
-from dendrogram_class import mask_mins
 from tqdm import tqdm
 
 
 
-def import_data():
+def import_data(guns_only=False):
     """
     Load in the dataframe and add the 'timestamp' converted date
     """
     with open('data/cs_df_M.pkl', 'rb') as f:
         df = pickle.load(f)
+    if guns_only:
+        return df[df['gun_bool']]
     return df
-
-def import_guns():
-    df = import_data()
-    return df[df['gun_bool']]
 
 
 def filter_data(dataframe, min_price=.15, min_quant=30, days_released=45):
@@ -32,9 +29,15 @@ def filter_data(dataframe, min_price=.15, min_quant=30, days_released=45):
     :param days_released: (int) Remove the first few days of release where the price is always very high.
     :return: df
     """
-    df = mask_mins(dataframe, min_price, min_quant)
-    df = df[df.days_since_release > days_released]
-    return df
+    # find the minimum quantity and minimum price for each item
+    df = dataframe.copy()
+    df['min_quant'] = df.groupby('item_name')['quantity'].transform('min')
+    df['min_price'] = df.groupby('item_name')['median_sell_price'].transform('min')
+    # remove all items with price and quant < threshold
+    df = df[df.min_quant > min_quant]
+    df = df[df.min_price > min_price]
+    #remove the first 'days_released' number of items
+    return df[df.days_since_release > days_released]
 
 
 def anom_consensus(dataframe, arima=True):
@@ -166,11 +169,16 @@ def scale_anomalies(anomalies, df):
     return sort_dict(scaled_anom_dict)
 
 
+def run_detection(filename, guns_only=False, min_price=.15, min_quant=30, days_released=45, arima=True):
+    df = import_data(guns_only=guns_only)
+    df = filter_data(df, min_price=min_price, min_quant=min_quant, days_released=days_released)
+    anomalies = anom_consensus(df, arima=arima)
+    with open(filename, 'wb') as f:
+    #with open('anomalies.pkl', 'wb') as f:
+        pickle.dump(anomalies, f)
+    return anomalies
+
 
 if __name__ == '__main__':
-    df = import_guns()
-    df = filter_data(df)
-    anomalies = anom_consensus(df, arima=False)
-    with open('gun_no_arima_anomalies.pkl', 'wb') as f:
-        pickle.dump(anomalies, f)
-    print_top(anomalies, n=30)
+    # print_top(run_detection('anomalies.pkl'), n=30)
+    print_top(run_detection('test.pkl'), n=30)

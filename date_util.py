@@ -25,6 +25,7 @@ def epoch_to_np(time_float):
 def timestamp_to_string(timestamp, format='%d %b %Y'):
     return timestamp.date().strftime(format)
 
+# I haven't needed to make these conversions yet, but I left the stubs for later
 def timestamp_to_epoch(timestamp):
     pass
 
