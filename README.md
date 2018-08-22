@@ -75,7 +75,9 @@ My plan was to run some kind of anomaly detection on every item's time series, a
 
 ### Clustering
 <img src='images/clustered_items_scaled.png' height=80% width=80% ALIGN='right'>
-I performed heirarchical clustering and looked at examples of items that were clustered tightly. As you can see in this example of three items (with standardized mean and standard deviation), their prices move similarly, and price changes that look anomalous appear in the same places.
+I performed heirarchical clustering and looked at examples of items that were clustered tightly. 
+
+As you can see in this example of three items (with standardized mean and standard deviation), their prices move similarly, and price changes that look anomalous appear in the same places.
 
 ### Anomaly Detection
 Many anomaly detection methods only find one anomalous point or rely on knowing the number of anomalies. Largely they use mean and standard deviation to find anomalies, which is inherantly problematic if the time series has many because the mean and standard deviation are sensitive to outliers. Twitter developed an anomaly detection algorithm that replaces mean and standard deviation with median and Median Absolute Deviation. This allows the algorithm to function consistently despite the number or severity of outliers.
