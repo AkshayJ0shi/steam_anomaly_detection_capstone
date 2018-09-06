@@ -90,7 +90,7 @@ There were a couple of factors that I had to take into account at this point as 
   2.  Almost universally, when items first come out they are far more expensive than they are a few days later. Part of what I wanted to investigate is whether new item releases affect the price of items that are already on the market. If the first several points in a time series are all marked as anomalies, my results will show new item releases as being anomalous whether they are or not, so I set up a parameter to removed the first _n_ days of sale.
   3. I took into account the fact that some items would sell infrequently and have a higher variance in price, as well as missing values. I created a parameter to remove items whose minimum quantity drops below a certain threshold.
 
-### Twitter doesn't always work
+### Anomaly Detection doesn't always work
 This is a graph of a particularly bad example of the anomaly detection function in action. It failed to hit the big drop in price in the middle, and the sharp spike on the right.
 
 <img src='images/detect_bad.png'>
