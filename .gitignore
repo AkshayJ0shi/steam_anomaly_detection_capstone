@@ -12,3 +12,5 @@ test*
 __pycache__/
 .pyramid-cache/
 data/games_with_items/
+data/patches/
+
