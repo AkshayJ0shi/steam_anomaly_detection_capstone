@@ -189,7 +189,6 @@ def run_detection(filename, guns_only=False, min_price=.15, min_quant=30, days_r
     df = filter_data(df, min_price=min_price, min_quant=min_quant, days_released=days_released)
     anomalies = anom_consensus(df, arima=arima)
     with open(filename, 'wb') as f:
-    #with open('anomalies.pkl', 'wb') as f:
         pickle.dump(anomalies, f)
     return anomalies
 
@@ -211,5 +210,4 @@ def remove_non_daily(original_df):
 
 
 if __name__ == '__main__':
-    # print_top(run_detection('anomalies.pkl'), n=30)
-    print_top(run_detection('test.pkl'), n=30)
+    print_top(run_detection('anomalies.pkl'), n=30)
