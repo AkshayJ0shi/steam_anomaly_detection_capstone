@@ -2,40 +2,54 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 import time
+import re
 
 
-def string_to_epoch(time_str, format='%d %b %Y'):
+def date_converter(date, convert_to='string'):
+    """
+    Converts any datetime object into any other (that I've accounted for).
+    :param date: any date objects listed below. String must be of the form '15 Jan 2001'
+    :param convert_to: Options are 'string', 'float', 'datetime', 'datetime64' (numpy), 'timestamp' (pandas)
+    :return: Converted date type object
+    """
+    # str(type()) returns somethig like "<class 'pandas.Timestamp'>" and I want to extract 'Timestamp'
+    return eval(re.findall(r'(\w+)', str(type(date)))[-1].lower() + '_to_{}(date)'.format(convert_to))
+
+# Need to rename functions, and replace them in other files with the date_converter.
+# types are: datetime, datetime64 (numpy), timestamp (pandas), float, string
+
+def string_to_float(time_str, format='%d %b %Y'):
     return time.mktime(datetime.strptime(time_str, format).timetuple())
 
-def string_to_Timestamp(time_str, format='%d %b %Y'):
-    return epoch_to_Timestamp(string_to_epoch(time_str, format)) # inefficient
+def string_to_timestamp(time_str, format='%d %b %Y'):
+    return float_to_timestamp(string_to_float(time_str, format))  # inefficient
 
-def string_to_np(time_str, format='%d %b %Y'):
-    return epoch_to_np(string_to_epoch(time_str, format)) # inefficient
+def string_to_datetime64(time_str, format='%d %b %Y'):
+    return float_to_datetime64(string_to_float(time_str, format))  # inefficient
 
-def epoch_to_string(time_float, format='%d %b %Y'):
+def float_to_string(time_float, format='%d %b %Y'):
     return datetime.fromtimestamp(time_float).strftime(format)
 
-def epoch_to_Timestamp(time_float):
+def float_to_timestamp(time_float):
     return pd.to_datetime(time_float, unit='s')
 
-def epoch_to_np(time_float):
+def float_to_datetime64(time_float):
     return np.datetime64(datetime.fromtimestamp(time_float).date())
 
 def timestamp_to_string(timestamp, format='%d %b %Y'):
     return timestamp.date().strftime(format)
 
-def timestamp_to_epoch(timestamp):
-    return string_to_epoch(timestamp_to_string(timestamp)) # inefficient
+def timestamp_to_float(timestamp):
+    return string_to_float(timestamp_to_string(timestamp))  # inefficient
 
-def timestamp_to_np(timestamp):
-    return string_to_np(timestamp_to_string(timestamp)) # inefficient
+def timestamp_to_datetime64(timestamp):
+    return string_to_datetime64(timestamp_to_string(timestamp))  # inefficient
 
-def np_to_string(time_np, format='%d %b %Y'):
-    return timestamp_to_string(np_to_Timestamp(time_np), format) # inefficient
+def datetime64_to_string(time_np, format='%d %b %Y'):
+    return timestamp_to_string(datetime64_to_timestamp(time_np), format) # inefficient
 
-def np_to_epoch(time_np):
-    return timestamp_to_epoch(np_to_Timestamp(time_np)) # inefficient
+def datetime64_to_float(time_np):
+    return timestamp_to_float(datetime64_to_timestamp(time_np))  # inefficient
 
-def np_to_Timestamp(time_np):
+def datetime64_to_timestamp(time_np):
     return pd.Timestamp(time_np)

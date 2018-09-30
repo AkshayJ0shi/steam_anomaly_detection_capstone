@@ -209,5 +209,5 @@ def remove_non_daily(original_df):
 ###############
 
 
-if __name__ == '__main__':
-    print_top(run_detection('anomalies.pkl'), n=30)
+# if __name__ == '__main__':
+#     print_top(run_detection('anomalies.pkl'), n=30)
