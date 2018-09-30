@@ -39,11 +39,7 @@ def calc_num_items(dict):
     """
     Calculates the total number of items to be used in the progress bar
     """
-    total = 0
-    for app, items in dict.items():
-        for item in items:
-            total += 1
-    return total
+    return sum([len(items) for items in item_dict.values()])
 
 if __name__ == '__main__':
     with open('data/market_item_list.txt') as f:
