@@ -1,4 +1,4 @@
-# ![Steam Logo](./images/steam20prct.png) Market Anomaly Detection
+# Marshall Payne - ![Steam Logo](./images/steam20prct.png) Market Anomaly Detection
 [__Summer 2018 Galvanize Data Science Immersive__](https://www.galvanize.com/austin)
 
 [See the video](https://youtu.be/1V9y67HRVrE) overview of this project.
