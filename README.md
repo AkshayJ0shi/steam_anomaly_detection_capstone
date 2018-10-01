@@ -65,7 +65,7 @@ Woof. There sure are a lot of different (and frustratingly incompatible) formats
   * Unix time (float)
   * DateTimeIndex
  
-Some of these have underlying timezones associated with them. Sometimes it's GMT and sometimes it's the local timezone. My data was stored in a different format than ARIMA took, which was a different format than the anomaly detection function took. I created [`date_util.py`](date_util.py) to help convert between them, and prevent conversions between date formats from being the things that breaks me.
+Some of these have underlying timezones associated with them. Sometimes it's GMT and sometimes it's the local timezone. My data was stored in a different format than ARIMA took, which was a different format than the anomaly detection function took. I made [`date_util.py`](date_util.py) to automatically convert between them with `date_converter()`.
 
 # Analysis
 <img src='images/workflow_analysis.png' height=80% width=80%>
