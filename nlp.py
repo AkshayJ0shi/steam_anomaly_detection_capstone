@@ -22,7 +22,8 @@ def get_gun_patch_count():
     with open('data/cs_df_M.pkl', 'rb') as f:
         df = pickle.load(f)
     guns = df.gun_type.dropna().unique()
-    return sorted([(x, collection.count_documents({'patch_notes': {'$regex': x}})) for x in guns], key=lambda x: x[1], reverse=True)
+    return sorted([(x, collection.count_documents({'patch_notes': {'$regex': x}})) for x in guns],
+                  key=lambda x: x[1], reverse=True)
 
 def stem_patch(patch):
     """Given the string of a patch update, tokenize and stem the patch notes"""
@@ -41,5 +42,6 @@ def label_anom_patches(patch_dict, anom_dates):
     Given a dict of {date:patch}, return [(notes, 0), (notes, 1)...]
     where index 1 labels anomalous or not.
     """
-    anom_date_range = set(flatten([pd.date_range(date-pd.Timedelta(3, unit='D'), date+pd.Timedelta(3, unit='D')) for date in anom_dates]))
+    anom_date_range = set(flatten([pd.date_range(date-pd.Timedelta(3, unit='D'), date+pd.Timedelta(3, unit='D'))
+                                   for date in anom_dates]))
     return [(text, 1) if date in anom_date_range else (text, 0) for date, text in patch_dict.items()]
