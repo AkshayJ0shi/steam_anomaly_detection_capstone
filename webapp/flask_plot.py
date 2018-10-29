@@ -2,40 +2,74 @@ import pandas as pd
 import numpy as np
 import io
 import pickle
-import random
+from collections import defaultdict
+import psycopg2 as pg
+from random import sample
 from bokeh.models import (HoverTool, FactorRange, Plot, LinearAxis, Grid,
                           Range1d)
 from bokeh.models.glyphs import VBar
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.models.sources import ColumnDataSource
+from bokeh import
 from flask import Flask, render_template
 
 app = Flask(__name__)
 
-with open('../data/')
+# Load data
+# with open('../data/cs_df_M.pkl', 'rb') as f:
+#     df = pickle.load(f)
 
+# Connect to the database
+conn = pg.connect(dbname='steam_capstone', host='localhost')
+cur = conn.cursor()
+# Get the item names
+query = """SELECT DISTINCT item_name from id;"""
+items_query = cur.execute(query)
+items = set(items_query.fetchall()) # set of item names
+# Get the item ids (they will be easier to work with and test manually for now)
+query = """SELECT DISTINCT item_id from id;"""
+item_ids_query = cur.execute(query)
+item_ids = set(items_query.fetchall()) # Set of item id's
+
+# Use the item names to populate a dictionary when the item id is put into the browser
+
+# The home page will redirect to a random item id for now
 @app.route('/')
 def index():
-    return chart(10)
+    return graph(sample(item_ids, 1))
 
-@app.route("/<int:bars_count>/")
-def chart(bars_count):
-    if bars_count <= 0:
-        bars_count = 1
+# NEED TO USE CALLBACKS TO GET SQL QUERIES
+@app.route("/<int:item_id>/")
+def graph(id):
+    data = defaultdict(list)
+    # Get dates, prices, quantity for the given item_id
+    query = """
+            SELECT date, price, quantity 
+            FROM sales
+            WHERE item_id = %s;
+            """
+    cur.execute(query, (id,))
+    query_data = cur.fetchall()
+    data['dates'] = [x[0] for x in query_data]
+    data['prices'] = [x[1] for x in query_data]
+    data['quantities'] = [x[2] for x in query_data]
 
-    data = {"days": [], "bugs": [], "costs": []}
-    for i in range(1, bars_count + 1):
-        data['days'].append(i)
-        data['bugs'].append(random.randint(1,100))
-        data['costs'].append(random.uniform(1.00, 1000.00))
+    # Get item name
+    query = """
+            SELECT item_name
+            FROM id
+            WHERE item_id = %s;"""
+    cur.execute(query, (id,))
+    item_name = cur.fetchone()[0]
+
 
     hover = create_hover_tool()
-    plot = create_bar_chart(data, "Bugs found per day", "days",
-                            "bugs", hover)
+    plot = create_graph(data, item_name, "dates",
+                            "prices", hover)
     script, div = components(plot)
 
-    return render_template("chart.html", bars_count=bars_count,
+    return render_template("chart.html", item_name=item_name,
                            the_div=div, the_script=script)
 
 # def create_hover_tool():
@@ -72,7 +106,7 @@ def create_hover_tool():
     )
 
 
-def create_bar_chart(data, title, x_name, y_name, hover_tool=None,
+def create_graph(data, title, x_name, y_name, hover_tool=None,
                      width=1200, height=300):
     """Creates a bar chart plot with the exact styling for the centcom
        dashboard. Pass in data as a dictionary, desired plot title,
