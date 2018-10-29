@@ -31,10 +31,12 @@ query = """SELECT DISTINCT item_id from id;"""
 cur.execute(query)
 item_ids = set([x[0] for x in cur.fetchall()]) # Set of item id's
 
+
 # The home page will redirect to a random item id for now
 @app.route('/')
 def index():
     return graph(sample(item_ids, 1)[0])
+
 
 # NEED TO USE CALLBACKS TO GET SQL QUERIES
 @app.route("/<int:item_id>/")
@@ -69,39 +71,25 @@ def graph(item_id):
     return render_template("chart.html", item_name=item_name,
                            the_div=div, the_script=script)
 
-# def create_hover_tool():
-#     """Generates the HTML for the Bokeh's hover data tool on our graph."""
-#     hover_html = """
-#       <div>
-#         <span class="hover-tooltip">$x</span>
-#       </div>
-#       <div>
-#         <span class="hover-tooltip">@bugs bugs</span>
-#       </div>
-#       <div>
-#         <span class="hover-tooltip">$@costs{0.00}</span>
-#       </div>
-#     """
-#     return HoverTool(tooltips=hover_html)
 
 def create_hover_tool():
     return HoverTool(
-        tooltips=[
-            ( 'Date',   '@dates{%F}'            ),
-            ( 'Median Price',  '$@{prices}{%0.2f}' ), # use @{ } for field names with spaces
-            ( 'Quantity', '@quantities{0.00 a}'      ),
-        ],
+                tooltips=[
+                    ('Date',   '@dates{%F}'),
+                    ('Median Price',  '$@{prices}{%0.2f}'), # use @{ } for field names with spaces
+                    ('Quantity', '@quantities'),],
+                formatters={
+                    'dates'      : 'datetime', # use 'datetime' formatter for 'date' field
+                    'prices' : 'printf',   # use 'printf' formatter for 'adj close' field
+                                              # use default 'numeral' formatter for other fields
+                },
+                # display a tooltip whenever the cursor is vertically in line with a glyph
+                mode='vline'
+            )
 
-        formatters={
-            'dates'      : 'datetime', # use 'datetime' formatter for 'date' field
-            'prices' : 'printf',   # use 'printf' formatter for 'adj close' field
-                                      # use default 'numeral' formatter for other fields
-        },
-
-        # display a tooltip whenever the cursor is vertically in line with a glyph
-        mode='vline'
-    )
-
+def anomaly_toggle():
+    # I'd like to be able to add a button that will turn on and off the anomaly labels, attached to the graph
+    pass
 
 def create_graph(data, title, x_name, y_name, hover_tool=None,
                      width=1200, height=300):
@@ -112,20 +100,14 @@ def create_graph(data, title, x_name, y_name, hover_tool=None,
     source = ColumnDataSource(data)
     ydr = Range1d(start=0, end=max(data[y_name])*1.5)
 
-    tools = []
-    if hover_tool:
-        tools = [hover_tool,]
-
     plot = figure(title=title, x_axis_type='datetime', y_range=ydr, plot_width=width,
                   plot_height=height, h_symmetry=False, v_symmetry=False,
-                  min_border=0, toolbar_location="above", tools=tools,
-                  sizing_mode='scale_width', outline_line_color="#666666")
-    # Sample bar graph
-    # glyph = VBar(x=x_name, top=y_name, bottom=0, width=1,
-    #              fill_color="#e02127")
-    # plot.add_glyph(source, glyph)
+                  min_border=0, toolbar_location="above", sizing_mode='scale_width',
+                  outline_line_color="#666666")
 
-    # Line graph
+    if hover_tool:
+        plot.add_tools(hover_tool)
+
     plot.line(x=x_name, y=y_name, source=source)
 
     xaxis = LinearAxis()
