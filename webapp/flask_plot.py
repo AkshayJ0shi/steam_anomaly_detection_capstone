@@ -22,11 +22,8 @@ app = Flask(__name__)
 # Connect to the database
 conn = pg.connect(dbname='steam_capstone', host='localhost')
 cur = conn.cursor()
-# Get the item names
-query = """SELECT DISTINCT item_name from id;"""
-cur.execute(query)
-items = set(cur.fetchall()) # set of item names
-# Get the item ids (they will be easier to work with and test manually for now)
+
+# Get the item ids
 query = """SELECT DISTINCT item_id from id;"""
 cur.execute(query)
 item_ids = set([x[0] for x in cur.fetchall()]) # Set of item id's
@@ -58,7 +55,8 @@ def graph(item_id):
     query = """
             SELECT item_name
             FROM id
-            WHERE item_id = %s;"""
+            WHERE item_id = %s;
+            """
     cur.execute(query, (item_id,))
     item_name = cur.fetchone()[0]
 
@@ -73,19 +71,15 @@ def graph(item_id):
 
 
 def create_hover_tool():
-    return HoverTool(
-                tooltips=[
-                    ('Date',   '@dates{%F}'),
-                    ('Median Price',  '$@{prices}{%0.2f}'), # use @{ } for field names with spaces
-                    ('Quantity', '@quantities'),],
-                formatters={
-                    'dates'      : 'datetime', # use 'datetime' formatter for 'date' field
-                    'prices' : 'printf',   # use 'printf' formatter for 'adj close' field
-                                              # use default 'numeral' formatter for other fields
-                },
-                # display a tooltip whenever the cursor is vertically in line with a glyph
-                mode='vline'
-            )
+    return HoverTool(tooltips=[
+                        ('Date', '@dates{%F}'),
+                        ('Median Price', '$@{prices}{%0.2f}'),
+                        ('Quantity', '@quantities')],
+                     formatters={'dates': 'datetime',  # use 'datetime' formatter for 'date' field
+                                 'prices': 'printf'},  # use 'printf' formatter for 'prices' field
+                                                       # use default 'numeral' formatter for other fields
+                     # display a tooltip whenever the cursor is vertically in line with a glyph
+                     mode='vline')
 
 def anomaly_toggle():
     # I'd like to be able to add a button that will turn on and off the anomaly labels, attached to the graph
