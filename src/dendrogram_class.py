@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.spatial.distance import pdist, squareform
 from sklearn.preprocessing import StandardScaler
-from date_util import string_to_float
+from src.date_util import str_to_float
 
 
 
@@ -41,8 +41,8 @@ class Dendrogram:
         self.pivot = self.pivot[self.pivot['days_since_release'] > days_dropped]
         # restrict the df to the specified date range
         if type(start_date) == str:
-            self.pivot = self.pivot[[(x >= string_to_float(start_date, format='%b %d %Y')) \
-                                     and (x <= string_to_float(end_date, format='%b %d %Y')) for x in self.pivot.date]]
+            self.pivot = self.pivot[[(x >= str_to_float(start_date, format='%b %d %Y')) \
+                                     and (x <= str_to_float(end_date, format='%b %d %Y')) for x in self.pivot.date]]
         else:
             self.pivot = self.pivot[[(x >= start_date) and (x <= end_date) for x in self.pivot.date]]
         self.pivot['info'] = self.pivot['item_name'] + ' ' + self.pivot['release_date']
