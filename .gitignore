@@ -13,4 +13,6 @@ __pycache__/
 .pyramid-cache/
 data/games_with_items/
 data/patches/
-
+__init__.py
+setup.py
+src.egg-info/
