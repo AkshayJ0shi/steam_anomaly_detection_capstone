@@ -19,7 +19,7 @@ def get_gun_patch_count():
     client = MongoClient()
     db = client['steam_capstone']
     collection = db['patches']
-    with open('data/cs_df_M.pkl', 'rb') as f:
+    with open('../data/cs_df_M.pkl', 'rb') as f:
         df = pickle.load(f)
     guns = df.gun_type.dropna().unique()
     return sorted([(x, collection.count_documents({'patch_notes': {'$regex': x}})) for x in guns],

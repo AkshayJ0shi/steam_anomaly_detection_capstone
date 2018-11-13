@@ -105,5 +105,5 @@ def make_dendrogram(dataframe, linkage_method='average', metric='cosine', save=F
     if save:
         plt.gcf()
         plt.tight_layout()
-        plt.savefig('dendrogram.png', dpi=400, pad_inches=0)
+        plt.savefig('../dendrogram.png', dpi=400, pad_inches=0)
     plt.show()

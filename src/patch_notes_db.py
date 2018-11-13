@@ -8,8 +8,8 @@ if __name__ == '__main__':
     client = MongoClient()
     db = client['steam_capstone']
     collection = db['patches']
-    for file_name in listdir('data/patches/'):
-        with open('data/patches/' + file_name) as f:
+    for file_name in listdir('../data/patches/'):
+        with open('../data/patches/' + file_name) as f:
             page = f.read()
         bs = BeautifulSoup(page, 'lxml')
         patches = bs.find_all(attrs={'class':'inner_post'})

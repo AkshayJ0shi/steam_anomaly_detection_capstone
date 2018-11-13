@@ -19,6 +19,6 @@ if __name__ == '__main__':
     for page_num in range(1,48):  # There are 47 pages
         progress(page_num, 47, "Page: " + str(page_num))
         request_return = scrape_page(page_num)
-        with open('data/patches/page' + str(page_num) + '.html', 'w') as file:
+        with open('../data/patches/page' + str(page_num) + '.html', 'w') as file:
             file.write(request_return.text)
         sleep(5)

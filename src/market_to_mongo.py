@@ -42,7 +42,7 @@ def calc_num_items(dict):
     return sum([len(items) for items in item_dict.values()])
 
 if __name__ == '__main__':
-    with open('data/market_item_list.txt') as f:
+    with open('../data/market_item_list.txt') as f:
         item_dict = ast.literal_eval(f.read()) # This file looks like [{app_id: app_name}...]
     client = MongoClient()
     db = client['steam_capstone']

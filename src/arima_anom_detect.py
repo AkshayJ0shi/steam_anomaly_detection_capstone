@@ -139,7 +139,7 @@ def print_top(anoms, n=30, sortByDate=False):
 def get_num_items_per_day(df):
     """
     Creates a dataframe with 'release_timestamp' and 'total_released'.
-    Use items_available() to get the number of items available for sale on that date.
+    Use items_available(timestamp, df) with the returned df to get the number of items available for sale on that date.
     :return: df
     """
     df_num_items = df.groupby('item_name').agg('median')
@@ -152,11 +152,11 @@ def get_num_items_per_day(df):
     return num_items
 
 
-def _items_available(ts, num_items):
+def items_available(ts, num_items_df):
     """
-    Returns number of items available on a given day, with the given get_num_items_per_day(df)
+    Returns number of items available on a given day, with the given num_items_df (output of get_num_items_per_day(df))
     """
-    return np.max(num_items[num_items['release_timestamp'] <= ts]['total_released'])
+    return np.max(num_items_df[num_items_df['release_timestamp'] <= ts]['total_released'])
 
 
 def scale_anomalies(anomalies, df):
@@ -170,7 +170,7 @@ def scale_anomalies(anomalies, df):
     num_items = get_num_items_per_day(df)
     scaled_anom_dict = {}
     for ts, count in anomalies:
-        scaled_anom_dict[ts] = count / _items_available(ts, num_items)
+        scaled_anom_dict[ts] = count / items_available(ts, num_items)
     return sort_dict(scaled_anom_dict)
 
 

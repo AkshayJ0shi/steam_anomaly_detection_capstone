@@ -74,5 +74,5 @@ def split_sales_records(record):
 # if __name__ == '__main__':
 #     cursor = get_cursor()
 #     df = iterator2dataframe(cursor, 20, func=split_sales_records, total=cursor.count())
-#     with open('data/all_apps_df.pkl', 'wb') as f:
+#     with open('../data/all_apps_df.pkl', 'wb') as f:
 #         pickle.dump(df, f)
