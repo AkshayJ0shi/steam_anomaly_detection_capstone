@@ -116,14 +116,6 @@ I investigated 25 dates with the highest anomaly score, and found that many of t
 
 This kind of information is useful for companies who rely on revenue from these items to be able to plan based on their estimated income, especially for games which are free-to-play like Team Fortress 2. Their revenue stream relies almost entirely around these items.
 
-# Future Work
-I plan to continue working on this project. The long term goal is to devise a way to automatically investigate dates that are scored highly using Natural Language Processing on a blog or forum. 
-
-In the short term my plans are:
-  * Investigate Nov 2016
-  * Adjust parameters (auto.arima, anomaly detection, minimum price, minimum quantity, etc.)
-  * Further work with clustering to see if I can define the tendencies of groups of items
-
 ---
 # Resources
 [Twitter Blog](https://blog.twitter.com/engineering/en_us/a/2015/introducing-practical-and-robust-anomaly-detection-in-a-time-series.html)
