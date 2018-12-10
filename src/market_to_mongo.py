@@ -35,7 +35,7 @@ def progress(count, total, status=''):
     sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
     sys.stdout.flush()
 
-def calc_num_items(dict):
+def calc_num_items(item_dict):
     """
     Calculates the total number of items to be used in the progress bar
     """
