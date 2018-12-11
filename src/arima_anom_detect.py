@@ -174,10 +174,12 @@ def scale_anomalies(anomalies, df):
     return sort_dict(scaled_anom_dict)
 
 
-def run_detection(filename, guns_only=False, min_price=.15, min_quant=30, days_released=45, arima=True):
+def run_detection(filename, dataframe='default', guns_only=False, min_price=.15, min_quant=30, days_released=45, arima=True):
     """
-    Make it easy to run in one line without forgetting to filter or change the filename
+    Make it easy to run in one line without forgetting to filter or change the filename.
     :param filename:
+    :param dataframe: the string 'default' or a dataframe object. The dataframe object requires the following columns:
+                      'item_name', 'quantity', 'median_sell_price',
     :param guns_only:
     :param min_price:
     :param min_quant:
@@ -185,7 +187,10 @@ def run_detection(filename, guns_only=False, min_price=.15, min_quant=30, days_r
     :param arima:
     :return:
     """
-    df = import_data(guns_only=guns_only)
+    if dataframe == 'default':
+        df = import_data(guns_only=guns_only)
+    else:
+        df = dataframe
     df = filter_data(df, min_price=min_price, min_quant=min_quant, days_released=days_released)
     anomalies = anom_consensus(df, arima=arima)
     with open(filename, 'wb') as f:
