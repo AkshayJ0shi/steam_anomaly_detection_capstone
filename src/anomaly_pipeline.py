@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 class AnomalyPipeline:
     def __init__(self, last_date=datetime.utcnow().date()-timedelta(32)):
         if last_date > datetime.utcnow().date()-timedelta(32):
-            last_date = datetime.utcnow().date()-timedelta(32)  # Cannot get data more recently than this
+            last_date = datetime.utcnow().date()-timedelta(32)  # Cannot use data more recently than this
         self.last_date = last_date
         self.anomalies = None
 
@@ -24,9 +24,10 @@ class AnomalyPipeline:
         update_list = get_updatable_items(self.last_date, cur)
         session = login_to_steam()
         for i, item in enumerate(update_list):
+            progress(i, len(update_list), item)
             if i % 10000 == 9999:  # I want to re-login every once in a while, but I'm afraid to do it too often
                 session = login_to_steam()
-            update_entry(item, self.last_date, session)
+            update_item(item, self.last_date, session)
         pass
 
     def update_dataframe(self):
@@ -51,7 +52,7 @@ def get_updatable_items(date, cursor):
                                 {'date': date}).fetchall()
     return [x[0] for x in item_names]
 
-def update_entry(item_name, last_date, session):
+def update_item(item_name, last_date, session):
     """
     Gets the latest entry of the item, requests data from Steam, then adds all of the missing price points between the
     latest entry and the last_date parameter.
@@ -77,11 +78,11 @@ def update_entry(item_name, last_date, session):
 
     i = 1
     while request.status_code != 200:
+        # Try waiting 1 minute, login again, then try waiting 5
+        # If it still doesn't work after waiting 5 minutes I'll need to look into the special case
         if i == 9:
             print('Could not update'+item_name)
             pass
-        # Try waiting 1 minute, login again, then try waiting 5
-        # If it still doesn't work after waiting 5 minutes I'll need to look into the special case
         time.sleep(60*i)
         i += 4
         login_to_steam()
@@ -109,5 +110,5 @@ def update_entry(item_name, last_date, session):
     pass
 
 
-def fill_missing():
+def fill_missing_sales():
     pass
