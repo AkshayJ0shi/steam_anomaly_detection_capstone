@@ -174,7 +174,7 @@ def scale_anomalies(anomalies, df):
     return sort_dict(scaled_anom_dict)
 
 
-def run_detection(filename, dataframe='default', guns_only=False, min_price=.15, min_quant=30, days_released=45, arima=True):
+def run_detection(filename, dataframe=pd.DataFrame(), guns_only=False, min_price=.15, min_quant=30, days_released=45, arima=True):
     """
     Make it easy to run in one line without forgetting to filter or change the filename.
     :param filename:
@@ -187,7 +187,7 @@ def run_detection(filename, dataframe='default', guns_only=False, min_price=.15,
     :param arima:
     :return:
     """
-    if dataframe == 'default':
+    if dataframe.empty:
         df = import_data(guns_only=guns_only)
     else:
         df = dataframe

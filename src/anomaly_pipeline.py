@@ -1,5 +1,7 @@
 import psycopg2 as pg2
 from psycopg2.extras import execute_values
+import pandas as pd
+import pandas.io.sql as sqlio
 from urllib.parse import quote_plus as url
 import steam.webauth as wa
 import os
@@ -7,7 +9,9 @@ import ast
 import sys
 import pickle
 import time
+from src.date_util import date_converter
 from src.market_to_mongo import *
+from src.arima_anom_detect import run_detection
 from datetime import datetime, timedelta
 
 
@@ -36,6 +40,23 @@ class AnomalyPipeline:
     def fit_anomalies(self):
         pass
 
+    def fit_anom_from_db(self):
+        """
+        Make a minimal df in memory from the data in the database, then run anomaly detection from that.
+        :return: print top 10 anomalies for now
+        """
+        # columns:
+        # 'item_name'
+        # 'quantity'
+        # 'median_sell_price'
+        # 'days_since_release'
+        # 'timestamp': date_converter(date, 'timestamp')
+        conn = pg2.connect(dbname='steam_capstone', host='localhost')
+        query = 'select * from sales;'
+        df = sqlio.read_sql_query(query, conn, parse_dates=['date'])
+        run_detection('anoms_from_db.pkl', dataframe=df)
+        pass
+
 
 def login_to_steam():
     user = wa.WebAuth(os.environ['STEAM_ID'], os.environ["STEAM_PASSWORD"])
@@ -48,8 +69,9 @@ def get_updatable_items(date, cursor):
     :param cursor: psql cursor
     :return: list of item names to request updates for
     """
-    item_names = cursor.execute('select distinct(item_name) from sales where date > %(date)s;',
-                                {'date': date}).fetchall()
+    cursor.execute('select distinct(item_name) from sales where date > %(date)s;',
+                                {'date': date})
+    item_names = cursor.fetchall()
     return [x[0] for x in item_names]
 
 def update_item(item_name, last_date, session):
@@ -112,3 +134,8 @@ def update_item(item_name, last_date, session):
 
 def fill_missing_sales():
     pass
+
+if __name__ == '__main__':
+    ap = AnomalyPipeline()
+    ap.update_database()
+    ap.fit_anom_from_db()
