@@ -14,9 +14,12 @@ def date_converter(date, convert_to='str', str_format=False):
     :return: Converted date type object
     """
     # str(type()) returns somethig like "<class 'pandas.Timestamp'>" and I want to extract 'Timestamp'
+    obj_type = re.findall(r'(\w+)', str(type(date)))[-1].lower()
+    if obj_type == 'date':
+        return date_converter(datetime(date.year, date.month, date.day), convert_to=convert_to, str_format=str_format)
     if str_format and convert_to == 'str':
-        return eval(re.findall(r'(\w+)', str(type(date)))[-1].lower() + '_to_str(date, format=str_format)')
-    return eval(re.findall(r'(\w+)', str(type(date)))[-1].lower() + '_to_{}(date)'.format(convert_to))
+        return eval(obj_type + '_to_str(date, format=str_format)')
+    return eval(obj_type + '_to_{}(date)'.format(convert_to))
 
 # Need to rename functions, and replace them in other files with the date_converter.
 # types are: datetime, datetime64 (numpy), timestamp (pandas), float, str
@@ -80,5 +83,7 @@ def datetime64_to_datetime(date):
 
 def timestamp_to_datetime(date):
     return date.to_pydatetime()
+
+
 
 
