@@ -6,6 +6,7 @@ import os
 import ast
 import sys
 import pickle
+import time
 from src.market_to_mongo import *
 from datetime import datetime, timedelta
 
@@ -59,6 +60,8 @@ def update_entry(item_name, last_date, session):
     conn = pg2.connect(dbname='steam_capstone', host='localhost')
     conn.autocommit = True
     cursor = conn.cursor()
+
+    # Get sales for the item in my database
     cursor.execute(
         """select item_id, date from sales
         where item_name = %(item_name)s
@@ -69,23 +72,40 @@ def update_entry(item_name, last_date, session):
         pass
     request = get_market_page(session, 730, item_name)
 
-    # add in checks to make sure request worked
+    i = 1
+    while request.status_code != 200:
+        if i == 9:
+            print('Could not update'+item_name)
+            pass
+        # Try waiting 1 minute, login again, then try waiting 5
+        # If it still doesn't work after waiting 5 minutes I'll need to look into the special case
+        time.sleep(60*i)
+        i += 4
+        login_to_steam()
+        request = get_market_page(session, 730, item_name)
+
     price_history = request.json()['prices']
-
-    # could fill in every missing date with 0's
-
     updates = [(item_id, item_name, datetime.strptime(date[:11], '%b %d %Y').date(), float(price), int(quantity))
                for date, price, quantity in price_history
                if last_date >= datetime.strptime(date[:11], '%b %d %Y').date() > latest_entry]
+    if len(updates) == 0:
+        pass
+
+    # This acts as a way of recognizing the update in the case of having no sales on that date
+    # Could fill in every missing date with 0's
     if updates[-1][2] != last_date:
         updates.append((item_id, item_name, last_date, 0., 0))
 
+    # I read that executemany is slow, possibly because it commits after each execution.
+    # Even though it's unlikely my data is on a scale for this to make a difference, I found execute_values as a faster
+    # alternative
     query = """insert into sales (item_id, item_name, date, price, quantity)
                values %s;"""
-
     execute_values(cursor, query, updates)
     conn.close()
     pass
 
 
+def fill_missing():
 
+    pass
