@@ -5,6 +5,8 @@
     * (Data for the past 31 days is hourly and my data needs to be daily, so I cannot use those data points.)
   * I request from Steam the data for each of those items and update the database with the data between the most recent data 
   I have and the data from 32 days ago.
+  * Since I check which items need updating before requesting any data, I can stop the script at any point without worrying
+  about wasting time making requests I don't need.
 
 _This step takes quite a while, the only way I can think to speed it up is to make more accounts and make requests in parallel_
   
