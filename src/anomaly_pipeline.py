@@ -13,6 +13,8 @@ from datetime import datetime, timedelta
 
 class AnomalyPipeline:
     def __init__(self, last_date=datetime.utcnow().date()-timedelta(32)):
+        if last_date > datetime.utcnow().date()-timedelta(32):
+            last_date = datetime.utcnow().date()-timedelta(32)  # Cannot get data more recently than this
         self.last_date = last_date
         self.anomalies = None
 
