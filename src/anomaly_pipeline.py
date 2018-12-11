@@ -1,4 +1,5 @@
 import psycopg2 as pg2
+from psycopg2.extras import execute_values
 from urllib.parse import quote_plus as url
 import steam.webauth as wa
 import os
@@ -19,9 +20,10 @@ class AnomalyPipeline:
         cur = conn.cursor()
         update_list = get_updatable_items(self.last_date, cur)
         session = login_to_steam()
-
-        for item in update_list:
-            update_entry(item, self.last_date, session, cur)
+        for i, item in enumerate(update_list):
+            if i % 10000 == 9999:
+                session = login_to_steam()
+            update_entry(item, self.last_date, session)
         pass
 
     def update_dataframe(self):
@@ -45,33 +47,45 @@ def get_updatable_items(date, cursor):
                                 {'date': date}).fetchall()
     return [x[0] for x in item_names]
 
-def update_entry(item_name, last_date, session, cursor):
+def update_entry(item_name, last_date, session):
     """
     Gets the latest entry of the item, requests data from Steam, then adds all of the missing price points between the
     latest entry and the last_date parameter.
     :param item_name: name of the item
     :param last_date: most recent entry to update database with
     :param session: Steam login session
-    :param cursor: psql cursor
     :return: None
     """
+    conn = pg2.connect(dbname='steam_capstone', host='localhost')
+    conn.autocommit = True
+    cursor = conn.cursor()
     cursor.execute(
         """select item_id, date from sales
         where item_name = %(item_name)s
         order by date desc
         limit 1;""", {'item_name':item_name})
     item_id, latest_entry = cursor.fetchone()
+    if latest_entry >= last_date:
+        pass
     request = get_market_page(session, 730, item_name)
 
     # add in checks to make sure request worked
     price_history = request.json()['prices']
-    if datetime.strptime(price_history[-1][0][:11], '%b %d %Y').date() != last_date:
-        price_history.append([last_date.strftime('%b %d %Y 01: +0'), '0', '0'])
+
     # could fill in every missing date with 0's
-    
+
     updates = [(item_id, item_name, datetime.strptime(date[:11], '%b %d %Y').date(), float(price), int(quantity))
                for date, price, quantity in price_history
-               if last_date > datetime.strptime(date[:11], '%b %d %Y').date() >= latest_entry]
+               if last_date >= datetime.strptime(date[:11], '%b %d %Y').date() > latest_entry]
+    if updates[-1][2] != last_date:
+        updates.append((item_id, item_name, last_date, 0., 0))
 
+    query = """insert into sales (item_id, item_name, date, price, quantity)
+               values %s;"""
 
+    execute_values(cursor, query, updates)
+    conn.close()
     pass
+
+
+
