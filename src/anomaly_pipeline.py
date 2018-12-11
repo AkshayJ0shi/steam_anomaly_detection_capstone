@@ -22,7 +22,7 @@ class AnomalyPipeline:
         update_list = get_updatable_items(self.last_date, cur)
         session = login_to_steam()
         for i, item in enumerate(update_list):
-            if i % 10000 == 9999:
+            if i % 10000 == 9999:  # I want to re-login every once in a while, but I'm afraid to do it too often
                 session = login_to_steam()
             update_entry(item, self.last_date, session)
         pass
@@ -32,6 +32,7 @@ class AnomalyPipeline:
 
     def fit_anomalies(self):
         pass
+
 
 def login_to_steam():
     user = wa.WebAuth(os.environ['STEAM_ID'], os.environ["STEAM_PASSWORD"])
@@ -107,5 +108,4 @@ def update_entry(item_name, last_date, session):
 
 
 def fill_missing():
-
     pass
