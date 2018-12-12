@@ -48,9 +48,8 @@ def anom_consensus(dataframe, arima=True):
     :return: a list of (Timestamp, number of anomalies) sorted most anomalies to least
     """
     anom_dict = defaultdict(lambda: 0)
-    items = dataframe.item_name.unique()
-    for item in tqdm(items):
-        df, release_date = prep_data(dataframe, item)
+    for item, df in tqdm(dataframe.groupby('item_name'), miniters=1):
+        df, release_date = prep_data(df)
         if arima:
             results = arima_smooth(df)
         else:
@@ -62,16 +61,14 @@ def anom_consensus(dataframe, arima=True):
     return scale_anomalies(anoms, dataframe)
 
 
-def prep_data(dataframe, item):
+def prep_data(dataframe):
     """
     Extract the time series for the given item, and return only the timestamp and median_sell_price columns to be used
     for detecting anomalies. Also returns the first timestamp, which is used to filter anomalies.
-    :param dataframe: full dataframe
-    :param item: Item name
+    :param dataframe: dataframe of one item (groupby item_name)
     :return: DataFrame([timestamp, median_sell_price]), first timestamp
     """
-    df = dataframe[dataframe['item_name'] == item]
-    return df[['timestamp', 'median_sell_price']].reset_index(drop=True), df.iloc[0]['timestamp']
+    return dataframe[['timestamp', 'median_sell_price']].reset_index(drop=True), dataframe.iloc[0]['timestamp']
 
 
 def arima_smooth(df):
