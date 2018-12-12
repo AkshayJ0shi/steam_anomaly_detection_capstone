@@ -9,6 +9,12 @@
   about wasting time making redundant requests when I restart it.
 
 _This step takes maybe 2 hours, the only way I can think to speed it up is to make more accounts and make requests in parallel_
+
+*Optimization attempts*:
+
+  * Timed querying a subset of the database before importing to a DataFrame vs importing all into a DataFrame, then filtering
+  * Reduced number of queries to the largest table
+  * Reduced number of times I connect to the database, although this only accounted for about a 1 min increase
   
 #### Model fitting:
   * I take the data from my Postgres database and put it into a Pandas DataFrame to easily add features needed for my model,
