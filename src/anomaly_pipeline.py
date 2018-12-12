@@ -11,7 +11,7 @@ import pickle
 import time
 from src.date_util import date_converter
 from src.market_to_mongo import *
-from src.arima_anom_detect import run_detection
+from src.arima_anom_detect import run_detection, print_top
 from datetime import datetime, timedelta
 
 
@@ -55,17 +55,16 @@ class AnomalyPipeline:
         df['days_since_release'] = df.groupby('item_name')['timestamp']\
             .transform(lambda x: map(lambda y: y.days, x-min(x)))
         terminal_display('Beginning anomaly detection...')
-        run_detection('anoms_from_db.pkl', dataframe=df)
+        print_top(run_detection('anoms_from_db.pkl', dataframe=df), n=10)
 
 
 def terminal_display(message):
     """
     Utility function to display progress messages in the terminal.
     :param message: Message to display
-    :return:
     """
-    sys.stdout.write("\033[K")
-    sys.stdout.write(message)
+    # sys.stdout.write("\033[K")
+    sys.stdout.write('\r'+message)
     sys.stdout.flush()
 
 def login_to_steam():
