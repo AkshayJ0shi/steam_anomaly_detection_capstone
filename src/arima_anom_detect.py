@@ -174,18 +174,20 @@ def scale_anomalies(anomalies, df):
     return sort_dict(scaled_anom_dict)
 
 
-def run_detection(filename, dataframe=pd.DataFrame(), guns_only=False, min_price=.15, min_quant=30, days_released=45, arima=True):
+def run_detection(filename, dataframe=pd.DataFrame(), guns_only=False,
+                  min_price=.15, min_quant=30, days_released=45, arima=True):
     """
     Make it easy to run in one line without forgetting to filter or change the filename.
-    :param filename:
+    :param filename: name of pickle file that will be saved
     :param dataframe: the string 'default' or a dataframe object. The dataframe object requires the following columns:
-                      'item_name', 'quantity', 'median_sell_price',
-    :param guns_only:
-    :param min_price:
-    :param min_quant:
-    :param days_released:
-    :param arima:
-    :return:
+    'item_name', 'quantity', 'median_sell_price',
+    :param guns_only: <bool> whether to take all items into account, or just the guns
+    :param min_price: minimum price threshold for removing data
+    :param min_quant: minimum quantity threshold for removing data
+    :param days_released: number of days at the start of the time series to remove. Items almost universally sell for
+    many times more than they do several days later
+    :param arima: <bool> smooth with arima or not
+    :return: list of (date, anomaly factor)'s sorted by anomaly factor
     """
     if dataframe.empty:
         df = import_data(guns_only=guns_only)
@@ -198,7 +200,7 @@ def run_detection(filename, dataframe=pd.DataFrame(), guns_only=False, min_price
     return anomalies
 
 
-# This and some of the other filtering functions should be in a separate file
+# This and some of the other filtering functions should probably be in a separate file
 def remove_non_daily(original_df):
     """
     Removes items that were not sold every day since they were released. I want consistant time series deltas. It is

@@ -22,17 +22,16 @@ class AnomalyPipeline:
         self.last_date = last_date
         self.anomalies = None
 
-    def update_database(self):
+    def update_database(self, update_date=datetime.utcnow().date()-timedelta(32)):
         conn = pg2.connect(dbname='steam_capstone', host='localhost')
         cur = conn.cursor()
-        update_list = get_updatable_items(self.last_date, cur)
+        update_list = get_updatable_items(update_date, cur)
         session = login_to_steam()
         for i, (item, latest_entry) in enumerate(update_list):
             progress(i, len(update_list), item)
             if i % 10000 == 9999:  # I want to re-login every once in a while, but I'm afraid to do it too often
                 session = login_to_steam()
-            update_item(item, self.last_date, latest_entry, session)
-        
+            update_item(item, update_date, latest_entry, session)
 
     def update_dataframe(self):
         pass
@@ -52,7 +51,7 @@ class AnomalyPipeline:
         # 'days_since_release'
         # 'timestamp': date_converter(date, 'timestamp')
         conn = pg2.connect(dbname='steam_capstone', host='localhost')
-        query = 'select * from sales;'
+        query = 'select * from sales order by date;'
         df = sqlio.read_sql_query(query, conn, parse_dates=['date'])
         df.columns = ['item_id', 'item_name', 'timestamp', 'median_sell_price', 'quantity']
         df = df.drop(columns=['item_id'])
@@ -138,5 +137,5 @@ def fill_missing_sales():
 
 if __name__ == '__main__':
     ap = AnomalyPipeline()
-    ap.update_database()
+    ap.update_database(update_date=datetime(2018, 12, 11).date()) # using manual dates for the sake of testing
     ap.fit_anom_from_db()
