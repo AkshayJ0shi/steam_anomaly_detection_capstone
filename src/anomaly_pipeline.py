@@ -27,12 +27,12 @@ class AnomalyPipeline:
         cur = conn.cursor()
         update_list = get_updatable_items(self.last_date, cur)
         session = login_to_steam()
-        for i, item in enumerate(update_list):
+        for i, (item, latest_entry) in enumerate(update_list):
             progress(i, len(update_list), item)
             if i % 10000 == 9999:  # I want to re-login every once in a while, but I'm afraid to do it too often
                 session = login_to_steam()
-            update_item(item, self.last_date, session)
-        pass
+            update_item(item, self.last_date, latest_entry, session)
+        
 
     def update_dataframe(self):
         pass
@@ -59,7 +59,7 @@ class AnomalyPipeline:
         df['days_since_release'] = df.groupby('item_name')['timestamp']\
             .transform(lambda x: map(lambda y: y.days, x-min(x)))
         run_detection('anoms_from_db.pkl', dataframe=df)
-        pass
+
 
 
 def login_to_steam():
@@ -73,12 +73,11 @@ def get_updatable_items(date, cursor):
     :param cursor: psql cursor
     :return: list of item names to request updates for
     """
-    cursor.execute('select distinct(item_name) from sales group by item_name having max(date) < %(date)s;',
+    cursor.execute('select distinct(item_name), max(date) from sales group by item_name having max(date) < %(date)s;',
                                 {'date': date})
-    item_names = cursor.fetchall()
-    return [x[0] for x in item_names]
+    return cursor.fetchall()
 
-def update_item(item_name, last_date, session):
+def update_item(item_name, last_date, latest_entry, session):
     """
     Gets the latest entry of the item, requests data from Steam, then adds all of the missing price points between the
     latest entry and the last_date parameter.
@@ -87,28 +86,26 @@ def update_item(item_name, last_date, session):
     :param session: Steam login session
     :return: None
     """
+    if latest_entry >= last_date:
+        return None
     conn = pg2.connect(dbname='steam_capstone', host='localhost')
     conn.autocommit = True
     cursor = conn.cursor()
 
     # Get sales for the item in my database
     cursor.execute(
-        """select item_id, date from sales
-        where item_name = %(item_name)s
-        order by date desc
-        limit 1;""", {'item_name':item_name})
-    item_id, latest_entry = cursor.fetchone()
-    if latest_entry >= last_date:
-        pass
-    request = get_market_page(session, 730, item_name)
+        """select item_id from id
+        where item_name = %(item_name)s;""", {'item_name':item_name})
+    item_id = cursor.fetchone()[0]
 
+    request = get_market_page(session, 730, item_name)
     i = 1
     while request.status_code != 200:
         # Try waiting 1 minute, login again, then try waiting 5
         # If it still doesn't work after waiting 5 minutes I'll need to look into the special case
         if i == 9:
             print('Could not update'+item_name)
-            pass
+            return None
         time.sleep(60*i)
         i += 4
         login_to_steam()
@@ -119,7 +116,7 @@ def update_item(item_name, last_date, session):
                for date, price, quantity in price_history
                if last_date >= datetime.strptime(date[:11], '%b %d %Y').date() > latest_entry]
     if len(updates) == 0:
-        pass
+        return None
 
     # This acts as a way of recognizing the update in the case of having no sales on that date
     # Could fill in every missing date with 0's
@@ -133,7 +130,7 @@ def update_item(item_name, last_date, session):
                values %s;"""
     execute_values(cursor, query, updates)
     conn.close()
-    pass
+
 
 
 def fill_missing_sales():
