@@ -1,62 +1,52 @@
 import psycopg2 as pg2
 from psycopg2.extras import execute_values
-import pandas as pd
-import pandas.io.sql as sqlio
-from urllib.parse import quote_plus as url
-import steam.webauth as wa
 import os
-import ast
-import sys
+import pandas.io.sql as sqlio
 import pickle
 import time
-from src.date_util import date_converter
 from src.market_to_mongo import *
 from src.arima_anom_detect import run_detection, print_top
 from datetime import datetime, timedelta
 from random import sample
 
+# My first instinct was to make this a class in order to save progress and easily access the models and anomalies.
+# This proved unnecessary in the end.
+# class AnomalyPipeline:
+#     def __init__(self, last_date=datetime.utcnow().date()-timedelta(32)):
+#         if last_date > datetime.utcnow().date()-timedelta(32):
+#             last_date = datetime.utcnow().date()-timedelta(32)  # Cannot use data more recently than this
+#         self.last_date = last_date
+#         self.anomalies = None
 
-class AnomalyPipeline:
-    def __init__(self, last_date=datetime.utcnow().date()-timedelta(32)):
-        if last_date > datetime.utcnow().date()-timedelta(32):
-            last_date = datetime.utcnow().date()-timedelta(32)  # Cannot use data more recently than this
-        self.last_date = last_date
-        self.anomalies = None
+def update_database(update_date=datetime.utcnow().date()-timedelta(32)):
+    terminal_display('Getting item list...')
+    update_date = min(update_date, datetime.utcnow().date()-timedelta(32))
+    conn = pg2.connect(dbname='steam_capstone', host='localhost')
+    cur = conn.cursor()
+    update_list = get_updatable_items(update_date, cur)
+    session = login_to_steam()
+    for i, (item, latest_entry) in enumerate(update_list):
+        progress(i, len(update_list), item)
+        if i % 10000 == 9999:  # I want to re-login every once in a while, but I'm afraid to do it too often
+            session = login_to_steam()
+        update_item(item, update_date, latest_entry, session)
 
-    def update_database(self, update_date=datetime.utcnow().date()-timedelta(32)):
-        terminal_display('Getting item list...')
-        update_date = min(update_date, datetime.utcnow().date()-timedelta(32))
-        conn = pg2.connect(dbname='steam_capstone', host='localhost')
-        cur = conn.cursor()
-        update_list = get_updatable_items(update_date, cur)
-        session = login_to_steam()
-        for i, (item, latest_entry) in enumerate(update_list):
-            progress(i, len(update_list), item)
-            if i % 10000 == 9999:  # I want to re-login every once in a while, but I'm afraid to do it too often
-                session = login_to_steam()
-            update_item(item, update_date, latest_entry, session)
 
-    def update_dataframe(self):
-        pass
-
-    def fit_anomalies(self):
-        pass
-
-    def fit_anom_from_db(self):
-        """
-        Make a minimal df in memory from the data in the database, then run anomaly detection from that.
-        :return: print top 10 anomalies for now
-        """
-        terminal_display('Creating DataFrame...')
-        conn = pg2.connect(dbname='steam_capstone', host='localhost')
-        query = 'select * from sales order by item_name, date;'
-        df = sqlio.read_sql_query(query, conn, parse_dates=['date'])
-        df.columns = ['item_id', 'item_name', 'timestamp', 'median_sell_price', 'quantity']
-        df = df.drop(columns=['item_id'])
-        df['days_since_release'] = df.groupby('item_name')['timestamp']\
-            .transform(lambda x: map(lambda y: y.days, x-min(x)))
-        terminal_display('Beginning anomaly detection...')
-        print_top(run_detection('anoms_from_db.pkl', dataframe=df), n=10)
+def fit_anom_from_db():
+    """
+    Make a minimal df in memory from the data in the database, then run anomaly detection from that.
+    :return: print top 10 anomalies for now
+    """
+    terminal_display('Creating DataFrame...')
+    conn = pg2.connect(dbname='steam_capstone', host='localhost')
+    query = 'select * from sales order by item_name, date;'
+    df = sqlio.read_sql_query(query, conn, parse_dates=['date'])
+    df.columns = ['item_id', 'item_name', 'timestamp', 'median_sell_price', 'quantity']
+    df = df.drop(columns=['item_id'])
+    df['days_since_release'] = df.groupby('item_name')['timestamp']\
+        .transform(lambda x: map(lambda y: y.days, x-min(x)))
+    terminal_display('Beginning anomaly detection...')
+    print_top(run_detection('anoms_from_db.pkl', dataframe=df), n=10)
 
 
 def terminal_display(message):
@@ -140,7 +130,8 @@ def update_item(item_name, last_date, latest_entry, session):
     execute_values(cursor, query, updates)
     conn.close()
 
-def test_fit_anom_from_db():
+# USED FOR TESTING
+def _test_fit_anom_from_db():
     """
     Test version of fit_anom_from_db using a small subset of the items.
     :return: print top 10 anomalies for now
@@ -159,7 +150,7 @@ def test_fit_anom_from_db():
     terminal_display('Beginning anomaly detection...')
     print_top(run_detection('anoms_from_db.pkl', dataframe=df), n=10)
 
-def store_sql_db():
+def _store_sql_db():
     conn = pg2.connect(dbname='steam_capstone', host='localhost')
     query = 'select * from sales order by item_name, date;'
     df = sqlio.read_sql_query(query, conn, parse_dates=['date'])
@@ -182,6 +173,8 @@ def fill_missing_sales():
     pass
 
 if __name__ == '__main__':
-    ap = AnomalyPipeline()
-    ap.update_database(update_date=datetime(2018, 11, 10).date()) # using manual dates for the sake of testing
-    test_fit_anom_from_db()
+    update_database(update_date=datetime(2018, 11, 10).date()) # using manual date to avoid the 2 hour wait while it
+                                                               # updates one data point
+    if not os.path.isfile('../data/sql_db.pkl'):
+        _store_sql_db()
+    _test_fit_anom_from_db()
