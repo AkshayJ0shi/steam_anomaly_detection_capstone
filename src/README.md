@@ -8,34 +8,29 @@
   * Since I check which items need updating before requesting any data, I can stop the script at any point without worrying
   about wasting time making redundant requests when I restart it.
 
-_This step takes maybe 2 hours, the only way I can think to speed it up is to make more accounts and make requests in parallel_
+_This step takes around 2 hours, and the only way I can think to speed it up is to make more accounts and make requests in parallel_
 
-*Optimization attempts*:
-
-  * Timed querying a subset of the database before importing to a DataFrame vs importing all into a DataFrame, then filtering
+**Optimization attempts**:
   * Reduced number of queries to the largest table
-  * Reduced number of times I connect to the database, although this only accounted for about a 1 min increase
+  * Reduced number of times I connect to the database, although this only accounted for an estimated 1 min increase over all
   
 #### Model fitting:
-  * I take the data from my Postgres database and put it into a Pandas DataFrame to easily add features needed for my model,
-  and change column names.
+  * I take the data from my Postgres database and put it into a Pandas DataFrame to easily add features needed for my model.
   * Disregard timeseries that do not meet certain criteria:
     * Minimum quantity sold (variance is too high)
     * Minimum price threshold* (cannot detect negative anomalies)
-  * Use auto-arima to smooth each timeseries. This helps the anomaly detection algorithm spot the larger anomalies.
+  * Use auto-arima to smooth each timeseries. This helps the anomaly detection algorithm spot the general anomalies.
   * Run anomaly detection on each timeseries.
   * The results are combined, and for any given date I take the percent of items that had that date marked as anomalous.
   This gives me a sort of "anomaly factor" for each date.
-  * Save the results to a pickle for ease of use.
+  * Save the results to a pickle for ease of use. I currently also print the top 10 anomalous dates with their anomaly factors.
 
-_I want to save the ARIMA models. auto-arima fits each timeseries with several ARIMA predictions to find the one that fits best. This is time consuming and likely unnecessary to refit if I updated the data recently.
-I also currently do not have a way to save progress if there's an error or keyboard interruption,
-which is something I would like to add. This step takes 1-2 hours._
+_This step currently takes 1-2 hours._
+
+**Optimization attempts**:
+  * Timed querying a subset of the database before importing to a DataFrame vs importing all into a DataFrame, then filtering. It appears querying once is faster.
+  * Timed iterating through df.groupby('item_name') instead of iterating through the item names and masking as I went. The groupby was many times faster, but because the number of items was relatively low, the time gained from this was negligible compared to the time it took to fit the model.
 
 *Minimum price threshold: the minimum price of an item is $0.03. $0.01 goes to the developers, $0.01 goes to the publisher,
 and $0.01 goes to the seller. If an item sells for the minimum price, the price cannot fall, and negative anomalies would not
 appear, so I disregard these items.
-
-<br>
-
-I now have a full pipeline from data gathering to results.
