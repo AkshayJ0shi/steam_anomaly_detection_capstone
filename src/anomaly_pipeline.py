@@ -54,6 +54,10 @@ class AnomalyPipeline:
         conn = pg2.connect(dbname='steam_capstone', host='localhost')
         query = 'select * from sales;'
         df = sqlio.read_sql_query(query, conn, parse_dates=['date'])
+        df.columns = ['item_id', 'item_name', 'timestamp', 'median_sell_price', 'quantity']
+        df = df.drop(columns=['item_id'])
+        df['days_since_release'] = df.groupby('item_name')['timestamp']\
+            .transform(lambda x: map(lambda y: y.days, x-min(x)))
         run_detection('anoms_from_db.pkl', dataframe=df)
         pass
 
@@ -69,7 +73,7 @@ def get_updatable_items(date, cursor):
     :param cursor: psql cursor
     :return: list of item names to request updates for
     """
-    cursor.execute('select distinct(item_name) from sales where date > %(date)s;',
+    cursor.execute('select distinct(item_name) from sales group by item_name having max(date) < %(date)s;',
                                 {'date': date})
     item_names = cursor.fetchall()
     return [x[0] for x in item_names]
