@@ -1,4 +1,4 @@
-## AnomalyPipeline:
+## [Anomaly Pipeline](anomaly_pipeline.py):
 ### The most recent update includes a complete pipeline from data gathering to results:
 #### Database update:
   * First I gather a list of all the items that do not have fully up-to-date data.
