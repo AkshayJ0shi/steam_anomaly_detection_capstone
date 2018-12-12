@@ -1,14 +1,14 @@
 ## [Anomaly Pipeline](anomaly_pipeline.py):
 ### The most recent update includes a complete pipeline from data gathering to results:
 #### Database update:
-  * First I gather a list of all the items that do not have fully up-to-date data.
+  * First I gather a list of all the items that do not have data points from 32 days ago.
     * (Data for the past 31 days is hourly and my data needs to be daily, so I cannot use those data points.)
   * I request from Steam the data for each of those items and update the database with the data between the most recent data 
-  I have and the data from 32 days ago.
+  I have and the data from 32 days ago. These are all strings so I strip and convert them to the proper types.
   * Since I check which items need updating before requesting any data, I can stop the script at any point without worrying
   about wasting time making redundant requests when I restart it.
 
-_This step takes around 2 hours, and the only way I can think to speed it up is to make more accounts and make requests in parallel_
+_This step takes around 2 hours, and the only way I can think to speed it up is to make multiple Steam accounts and make requests in parallel._
 
 **Optimization attempts**:
   * Reduced number of queries to the largest table
@@ -28,7 +28,7 @@ _This step takes around 2 hours, and the only way I can think to speed it up is 
 _This step currently takes 1-2 hours._
 
 **Optimization attempts**:
-  * Timed querying a subset of the database before importing to a DataFrame vs importing all into a DataFrame, then filtering. It appears querying once is faster.
+  * Timed making multiple smaller queries and joining the DataFrames vs importing all into a DataFrame, then filtering. It appears querying once is faster.
   * Timed iterating through df.groupby('item_name') instead of iterating through the item names and masking as I went. The groupby was many times faster, but because the number of items was relatively low, the time gained from this was negligible compared to the time it took to fit the model.
 
 *Minimum price threshold: the minimum price of an item is $0.03. $0.01 goes to the developers, $0.01 goes to the publisher,
