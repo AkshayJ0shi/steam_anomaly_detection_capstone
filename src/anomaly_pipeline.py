@@ -23,6 +23,8 @@ class AnomalyPipeline:
         self.anomalies = None
 
     def update_database(self, update_date=datetime.utcnow().date()-timedelta(32)):
+        terminal_display('Getting item list...')
+        update_date = min(update_date, datetime.utcnow().date()-timedelta(32))
         conn = pg2.connect(dbname='steam_capstone', host='localhost')
         cur = conn.cursor()
         update_list = get_updatable_items(update_date, cur)
@@ -44,24 +46,33 @@ class AnomalyPipeline:
         Make a minimal df in memory from the data in the database, then run anomaly detection from that.
         :return: print top 10 anomalies for now
         """
-        # columns:
-        # 'item_name'
-        # 'quantity'
-        # 'median_sell_price'
-        # 'days_since_release'
-        # 'timestamp': date_converter(date, 'timestamp')
+        terminal_display('Creating DataFrame...')
         conn = pg2.connect(dbname='steam_capstone', host='localhost')
-        query = 'select * from sales order by date;'
+        query = 'select * from sales order by item_name, date;'
         df = sqlio.read_sql_query(query, conn, parse_dates=['date'])
         df.columns = ['item_id', 'item_name', 'timestamp', 'median_sell_price', 'quantity']
         df = df.drop(columns=['item_id'])
         df['days_since_release'] = df.groupby('item_name')['timestamp']\
             .transform(lambda x: map(lambda y: y.days, x-min(x)))
+        terminal_display('Beginning anomaly detection...')
         run_detection('anoms_from_db.pkl', dataframe=df)
 
 
+def terminal_display(message):
+    """
+    Utility function to display progress messages in the terminal.
+    :param message: Message to display
+    :return:
+    """
+    sys.stdout.write("\033[K")
+    sys.stdout.write(message)
+    sys.stdout.flush()
 
 def login_to_steam():
+    """
+    Must be logged into an account to make requests from Steam
+    :return: session object
+    """
     user = wa.WebAuth(os.environ['STEAM_ID'], os.environ["STEAM_PASSWORD"])
     return user.login()
 
@@ -114,12 +125,10 @@ def update_item(item_name, last_date, latest_entry, session):
     updates = [(item_id, item_name, datetime.strptime(date[:11], '%b %d %Y').date(), float(price), int(quantity))
                for date, price, quantity in price_history
                if last_date >= datetime.strptime(date[:11], '%b %d %Y').date() > latest_entry]
-    if len(updates) == 0:
-        return None
 
     # This acts as a way of recognizing the update in the case of having no sales on that date
     # Could fill in every missing date with 0's
-    if updates[-1][2] != last_date:
+    if len(updates) == 0 or updates[-1][2] != last_date:
         updates.append((item_id, item_name, last_date, 0., 0))
 
     # I read that executemany is slow, possibly because it commits after each execution.
@@ -137,5 +146,5 @@ def fill_missing_sales():
 
 if __name__ == '__main__':
     ap = AnomalyPipeline()
-    ap.update_database(update_date=datetime(2018, 12, 11).date()) # using manual dates for the sake of testing
+    ap.update_database(update_date=datetime(2018, 11, 10).date()) # using manual dates for the sake of testing
     ap.fit_anom_from_db()
