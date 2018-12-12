@@ -31,52 +31,6 @@ def update_database(update_date=datetime.utcnow().date()-timedelta(32)):
             session = login_to_steam()
         update_item(item, update_date, latest_entry, session)
 
-
-def fit_anom_from_db():
-    """
-    Make a minimal df in memory from the data in the database, then run anomaly detection from that.
-    :return: print top 10 anomalies for now
-    """
-    terminal_display('Creating DataFrame...')
-    conn = pg2.connect(dbname='steam_capstone', host='localhost')
-    query = 'select * from sales order by item_name, date;'
-    df = sqlio.read_sql_query(query, conn, parse_dates=['date'])
-    df.columns = ['item_id', 'item_name', 'timestamp', 'median_sell_price', 'quantity']
-    df = df.drop(columns=['item_id'])
-    df['days_since_release'] = df.groupby('item_name')['timestamp']\
-        .transform(lambda x: map(lambda y: y.days, x-min(x)))
-    terminal_display('Beginning anomaly detection...')
-    print_top(run_detection('anoms_from_db.pkl', dataframe=df), n=10)
-
-
-def terminal_display(message):
-    """
-    Utility function to display progress messages in the terminal.
-    :param message: Message to display
-    """
-    # sys.stdout.write("\033[K")
-    sys.stdout.write('\r'+message)
-    sys.stdout.flush()
-
-def login_to_steam():
-    """
-    Must be logged into an account to make requests from Steam
-    :return: session object
-    """
-    user = wa.WebAuth(os.environ['STEAM_ID'], os.environ["STEAM_PASSWORD"])
-    return user.login()
-
-def get_updatable_items(date, cursor):
-    """
-    Looks through the Postgres database to see which items are missing up to date records.
-    :param date: datetime.date() object of the latest date to request records for
-    :param cursor: psql cursor
-    :return: list of item names to request updates for
-    """
-    cursor.execute('select distinct(item_name), max(date) from sales group by item_name having max(date) < %(date)s;',
-                                {'date': date})
-    return cursor.fetchall()
-
 def update_item(item_name, last_date, latest_entry, session):
     """
     Gets the latest entry of the item, requests data from Steam, then adds all of the missing price points between the
@@ -129,6 +83,54 @@ def update_item(item_name, last_date, latest_entry, session):
                values %s;"""
     execute_values(cursor, query, updates)
     conn.close()
+
+def fit_anom_from_db():
+    """
+    Make a minimal df in memory from the data in the database, then run anomaly detection from that.
+    :return: print top 10 anomalies for now
+    """
+    terminal_display('Creating DataFrame...')
+    conn = pg2.connect(dbname='steam_capstone', host='localhost')
+    query = 'select * from sales order by item_name, date;'
+    df = sqlio.read_sql_query(query, conn, parse_dates=['date'])
+    df.columns = ['item_id', 'item_name', 'timestamp', 'median_sell_price', 'quantity']
+    df = df.drop(columns=['item_id'])
+    df['days_since_release'] = df.groupby('item_name')['timestamp']\
+        .transform(lambda x: map(lambda y: y.days, x-min(x)))
+    terminal_display('Beginning anomaly detection...')
+    print_top(run_detection('anoms_from_db.pkl', dataframe=df), n=10)
+
+
+# UTILITY
+def terminal_display(message):
+    """
+    Utility function to display progress messages in the terminal.
+    :param message: Message to display
+    """
+    # sys.stdout.write("\033[K")
+    sys.stdout.write('\r'+message)
+    sys.stdout.flush()
+
+def login_to_steam():
+    """
+    Must be logged into an account to make requests from Steam
+    :return: session object
+    """
+    user = wa.WebAuth(os.environ['STEAM_ID'], os.environ["STEAM_PASSWORD"])
+    return user.login()
+
+def get_updatable_items(date, cursor):
+    """
+    Looks through the Postgres database to see which items are missing up to date records.
+    :param date: datetime.date() object of the latest date to request records for
+    :param cursor: psql cursor
+    :return: list of item names to request updates for
+    """
+    cursor.execute('select distinct(item_name), max(date) from sales group by item_name having max(date) < %(date)s;',
+                                {'date': date})
+    return cursor.fetchall()
+
+
 
 # USED FOR TESTING
 def _test_fit_anom_from_db():

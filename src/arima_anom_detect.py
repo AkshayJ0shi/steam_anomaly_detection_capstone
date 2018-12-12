@@ -20,6 +20,7 @@ def import_data(guns_only=False):
     return df
 
 
+# update with df.groupby().filter()
 def filter_data(dataframe, min_price=.15, min_quant=30, days_released=45):
     """
     Filter items that don't meet the threshold of price or quantity. Remove the first few days of release where the
