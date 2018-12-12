@@ -13,6 +13,7 @@ from src.date_util import date_converter
 from src.market_to_mongo import *
 from src.arima_anom_detect import run_detection, print_top
 from datetime import datetime, timedelta
+from random import sample
 
 
 class AnomalyPipeline:
@@ -92,6 +93,7 @@ def update_item(item_name, last_date, latest_entry, session):
     latest entry and the last_date parameter.
     :param item_name: name of the item
     :param last_date: most recent entry to update database with
+    :param latest_entry: the item's most recent data point
     :param session: Steam login session
     :return: None
     """
@@ -138,6 +140,42 @@ def update_item(item_name, last_date, latest_entry, session):
     execute_values(cursor, query, updates)
     conn.close()
 
+def test_fit_anom_from_db():
+    """
+    Test version of fit_anom_from_db using a small subset of the items.
+    :return: print top 10 anomalies for now
+    """
+    terminal_display('Creating DataFrame...')
+    with open('sql_db.pkl', 'rb') as f:
+        df = pickle.load(f)
+    df.columns = ['item_id', 'item_name', 'timestamp', 'median_sell_price', 'quantity']
+    df = df.drop(columns=['item_id'])
+    keep_items = sample(list(df[_test_mask_filters(df)].item_name.unique()), k=10)
+    drop_items = sample(list(df[~_test_mask_filters(df)].item_name.unique()), k=10)
+    query_items = keep_items + drop_items
+    df = df[[x in query_items for x in df.item_name]]
+    df['days_since_release'] = df.groupby('item_name')['timestamp']\
+        .transform(lambda x: map(lambda y: y.days, x-min(x)))
+    terminal_display('Beginning anomaly detection...')
+    print_top(run_detection('anoms_from_db.pkl', dataframe=df), n=10)
+
+def store_sql_db():
+    conn = pg2.connect(dbname='steam_capstone', host='localhost')
+    query = 'select * from sales order by item_name, date;'
+    df = sqlio.read_sql_query(query, conn, parse_dates=['date'])
+    with open('../data/sql_db.pkl', 'wb') as f:
+        pickle.dump(df, f)
+
+def _test_mask_filters(dataframe, min_price=.15, min_quant=30):
+    """
+    Used in test_fit_anom_from_db. Gives a mask of data that meets the threshold requirements
+    """
+    df = dataframe.copy()
+    df['min_quant'] = df.groupby('item_name')['quantity'].transform('min')
+    df['min_price'] = df.groupby('item_name')['median_sell_price'].transform('min')
+    # remove all items with price and quant < threshold
+    return (df.min_quant > min_quant) & (df.min_price > min_price)
+
 
 
 def fill_missing_sales():
@@ -146,4 +184,4 @@ def fill_missing_sales():
 if __name__ == '__main__':
     ap = AnomalyPipeline()
     ap.update_database(update_date=datetime(2018, 11, 10).date()) # using manual dates for the sake of testing
-    ap.fit_anom_from_db()
+    test_fit_anom_from_db()

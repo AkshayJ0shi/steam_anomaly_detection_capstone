@@ -1,7 +1,7 @@
 import pickle
 from pyculiarity import detect_ts
 from pyramid.arima import auto_arima
-from collections import defaultdict
+from collections import defaultdict, Counter
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -133,20 +133,28 @@ def print_top(anoms, n=30, sortByDate=False):
         print(*[(x.date().strftime('%d %b %Y'), y) for x, y in anoms[:n]], sep='\n')
 
 
+# def get_num_items_per_day(df):
+#     """
+#     Creates a dataframe with 'release_timestamp' and 'total_released'.
+#     Use items_available(timestamp, df) with the returned df to get the number of items available for sale on that date.
+#     :return: df
+#     """
+#     df_num_items = df.groupby('item_name').agg('median')
+#     df_num_items['release_timestamp'] = [pd.to_datetime(t, unit='s').date() for t in df_num_items['est_release']]
+#     df_num_items = df_num_items.groupby('release_timestamp').count()
+#     df_num_items['total_released'] = np.cumsum(df_num_items['median_sell_price'])
+#     num_items = df_num_items['total_released']
+#     num_items = num_items.reset_index()
+#     num_items['release_timestamp'] = [pd.to_datetime(t) for t in num_items['release_timestamp']]
+#     return num_items
+
 def get_num_items_per_day(df):
-    """
-    Creates a dataframe with 'release_timestamp' and 'total_released'.
-    Use items_available(timestamp, df) with the returned df to get the number of items available for sale on that date.
-    :return: df
-    """
-    df_num_items = df.groupby('item_name').agg('median')
-    df_num_items['release_timestamp'] = [pd.to_datetime(t, unit='s').date() for t in df_num_items['est_release']]
-    df_num_items = df_num_items.groupby('release_timestamp').count()
-    df_num_items['total_released'] = np.cumsum(df_num_items['median_sell_price'])
-    num_items = df_num_items['total_released']
-    num_items = num_items.reset_index()
-    num_items['release_timestamp'] = [pd.to_datetime(t) for t in num_items['release_timestamp']]
-    return num_items
+    num_items_df = Counter(df.groupby('item_name')['timestamp'].min().values)
+    num_items_df = pd.DataFrame([(x, y) for x, y in num_items_df.items()],
+                                columns=['release_timestamp', 'total_released'])
+    num_items_df = num_items_df.sort_values('release_timestamp').reset_index(drop=True)
+    num_items_df['total_released'] = np.cumsum(num_items_df['total_released'])
+    return num_items_df
 
 
 def items_available(ts, num_items_df):
