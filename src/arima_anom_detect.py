@@ -31,15 +31,14 @@ def filter_data(dataframe, min_price=.15, min_quant=30, days_released=45):
     :param days_released: (int) Remove the first few days of release where the price is always very high.
     :return: df
     """
+    # remove the first 'days_released' number of items
+    df = dataframe[dataframe.days_since_release > days_released]
     # find the minimum quantity and minimum price for each item
-    df = dataframe.copy()
     df['min_quant'] = df.groupby('item_name')['quantity'].transform('min')
     df['min_price'] = df.groupby('item_name')['median_sell_price'].transform('min')
     # remove all items with price and quant < threshold
     df = df[df.min_quant > min_quant]
-    df = df[df.min_price > min_price]
-    #remove the first 'days_released' number of items
-    return df[df.days_since_release > days_released]
+    return df[df.min_price > min_price]
 
 
 def anom_consensus(dataframe, arima=True):
@@ -134,22 +133,12 @@ def print_top(anoms, n=30, sortByDate=False):
         print(*[(x.date().strftime('%d %b %Y'), y) for x, y in anoms[:n]], sep='\n')
 
 
-# def get_num_items_per_day(df):
-#     """
-#     Creates a dataframe with 'release_timestamp' and 'total_released'.
-#     Use items_available(timestamp, df) with the returned df to get the number of items available for sale on that date.
-#     :return: df
-#     """
-#     df_num_items = df.groupby('item_name').agg('median')
-#     df_num_items['release_timestamp'] = [pd.to_datetime(t, unit='s').date() for t in df_num_items['est_release']]
-#     df_num_items = df_num_items.groupby('release_timestamp').count()
-#     df_num_items['total_released'] = np.cumsum(df_num_items['median_sell_price'])
-#     num_items = df_num_items['total_released']
-#     num_items = num_items.reset_index()
-#     num_items['release_timestamp'] = [pd.to_datetime(t) for t in num_items['release_timestamp']]
-#     return num_items
-
 def get_num_items_per_day(df):
+    """
+        Creates a dataframe with 'release_timestamp' and 'total_released'.
+        Use items_available(timestamp, df) with the returned df to get the number of items available for sale on that date.
+        :return: df
+    """
     num_items_df = Counter(df.groupby('item_name')['timestamp'].min().values)
     num_items_df = pd.DataFrame([(x, y) for x, y in num_items_df.items()],
                                 columns=['release_timestamp', 'total_released'])
