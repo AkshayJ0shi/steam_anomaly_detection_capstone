@@ -16,6 +16,7 @@ _This step takes around 2 hours, and the only way I can think to speed it up is 
   
 #### Model fitting:
   * I take the data from my Postgres database and put it into a Pandas DataFrame to easily add features needed for my model.
+    * (I also wrote a SQL query that skips the next step by filtering the data before putting it in a DataFrame just for fun. I think this could be used if I had too much data to fit into memory, but it is slower.) 
   * Disregard timeseries that do not meet certain criteria:
     * Minimum quantity sold (variance is too high)
     * Minimum price threshold* (cannot detect negative anomalies)
