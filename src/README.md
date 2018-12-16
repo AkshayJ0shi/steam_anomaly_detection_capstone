@@ -35,3 +35,5 @@ _This step currently takes 1-2 hours._
 *Minimum price threshold: the minimum price of an item is $0.03. $0.01 goes to the developers, $0.01 goes to the publisher,
 and $0.01 goes to the seller. If an item sells for the minimum price, the price cannot fall, and negative anomalies would not
 appear, so I disregard these items.
+
+And just as a note: I set up a new environment for my capstone project when I installed the auto-arima and anomaly detection packages. I also made this src folder a Python package and added it to that environment.
