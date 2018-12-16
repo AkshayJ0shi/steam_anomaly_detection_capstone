@@ -133,23 +133,6 @@ def fit_anom_sql(min_price=.15, min_quant=30, days_released=45):
 
 
 # UTILITY
-def terminal_display(message):
-    """
-    Utility function to display progress messages in the terminal.
-    :param message: Message to display
-    """
-    # sys.stdout.write("\033[K")
-    sys.stdout.write('\r'+message)
-    sys.stdout.flush()
-
-def login_to_steam():
-    """
-    Must be logged into an account to make requests from Steam
-    :return: session object
-    """
-    user = wa.WebAuth(os.environ['STEAM_ID'], os.environ["STEAM_PASSWORD"])
-    return user.login()
-
 def get_updatable_items(date, cursor):
     """
     Looks through the Postgres database to see which items are missing up to date records.
@@ -160,6 +143,23 @@ def get_updatable_items(date, cursor):
     cursor.execute('select distinct(item_name), max(date) from sales group by item_name having max(date) < %(date)s;',
                                 {'date': date})
     return cursor.fetchall()
+
+def login_to_steam():
+    """
+    Must be logged into an account to make requests from Steam
+    :return: session object
+    """
+    user = wa.WebAuth(os.environ['STEAM_ID'], os.environ["STEAM_PASSWORD"])
+    return user.login()
+
+def terminal_display(message):
+    """
+    Utility function to display progress messages in the terminal.
+    :param message: Message to display
+    """
+    # sys.stdout.write("\033[K")
+    sys.stdout.write('\r'+message)
+    sys.stdout.flush()
 
 
 if __name__ == '__main__':
