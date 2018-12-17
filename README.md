@@ -119,6 +119,7 @@ This kind of information is useful for companies who rely on revenue from these 
 ---
 # Resources
 [Twitter Blog](https://blog.twitter.com/engineering/en_us/a/2015/introducing-practical-and-robust-anomaly-detection-in-a-time-series.html)
+
 [Twitter AnomalyDetection](https://github.com/twitter/AnomalyDetection)
 
 [Pyculiarity](https://github.com/mosho-p/pyculiarity): my fork of Nicolas Steven Miller's Python port of Twitter Anomaly Detection
