@@ -1,5 +1,5 @@
-from src.anomaly_pipeline import *
 from random import sample
+from src.anomaly_pipeline import *
 
 
 def _test_fit_anom_from_db():

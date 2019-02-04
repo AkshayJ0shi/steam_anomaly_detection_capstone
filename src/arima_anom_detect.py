@@ -1,10 +1,11 @@
-import pickle
-from pyculiarity import detect_ts
-from pyramid.arima import auto_arima
-from collections import defaultdict, Counter
 import pandas as pd
 import numpy as np
+from collections import defaultdict, Counter
 from datetime import datetime
+import pickle
+
+from pyculiarity import detect_ts
+from pyramid.arima import auto_arima
 from tqdm import tqdm
 
 

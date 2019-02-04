@@ -1,7 +1,8 @@
-from bs4 import BeautifulSoup
 from datetime import datetime
 from os import listdir
+
 from pymongo import MongoClient
+from bs4 import BeautifulSoup
 
 
 if __name__ == '__main__':

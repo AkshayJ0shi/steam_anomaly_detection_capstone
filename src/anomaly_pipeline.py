@@ -1,13 +1,16 @@
-import psycopg2 as pg2
-from psycopg2.extras import execute_values
 import os
-import pandas.io.sql as sqlio
-import pickle
 import time
-from src.market_to_mongo import *
-from src.arima_anom_detect import run_detection, print_top, anom_consensus
 from datetime import datetime, timedelta
 from random import sample
+import pandas.io.sql as sqlio
+import pickle
+
+import psycopg2 as pg2
+from psycopg2.extras import execute_values
+
+from src.market_to_mongo import *
+from src.arima_anom_detect import run_detection, print_top, anom_consensus
+
 
 # My first instinct was to make this a class in order to save progress and easily access the models and anomalies.
 # This proved unnecessary in the end.

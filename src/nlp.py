@@ -1,13 +1,15 @@
-from pymongo import MongoClient
 import pandas as pd
 import numpy as np
-import pickle
 import re
+
 from nltk.tokenize import sent_tokenize
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+from pymongo import MongoClient
+import pickle
 
 
 def get_gun_patch_count():

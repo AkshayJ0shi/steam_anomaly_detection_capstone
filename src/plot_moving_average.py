@@ -1,8 +1,9 @@
+import time
+import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import time
-import datetime
+
 
 
 def fromts(ts):

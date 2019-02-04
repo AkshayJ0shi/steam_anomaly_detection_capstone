@@ -1,6 +1,7 @@
-import requests
 import sys
 from time import sleep
+import requests
+
 
 def scrape_page(page):
     return requests.get('http://blog.counter-strike.net/index.php/category/updates/page/{}/'.format(page))

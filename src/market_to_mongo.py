@@ -1,9 +1,11 @@
-from pymongo import MongoClient
-from urllib.parse import quote_plus as url
-import steam.webauth as wa
 import os
-import ast
 import sys
+import ast
+
+from urllib.parse import quote_plus as url
+from pymongo import MongoClient
+
+import steam.webauth as wa
 
 
 def get_market_page(session, app, item):

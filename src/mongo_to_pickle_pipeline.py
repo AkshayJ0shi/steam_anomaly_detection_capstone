@@ -1,8 +1,10 @@
-from pymongo import MongoClient
-import pandas as pd
-from tqdm import tqdm
 import time
 import datetime
+import pandas as pd
+
+from pymongo import MongoClient
+from tqdm import tqdm
+
 
 
 def get_cursor(app=None):
